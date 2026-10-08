@@ -208,6 +208,7 @@ export class LootApp extends Base {
     if (!cfg) return;
     const t = (k) => game.i18n.localize(k);
     const data = await foundry.applications.api.DialogV2.prompt({
+      classes: ["cl-dialog"],
       window: { title: t("CLOOT.Pick.Config"), icon: "fa-solid fa-hand-holding" },
       content: `
         <div class="form-group"><label>${t("CLOOT.Pick.Allow")}</label>

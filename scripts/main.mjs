@@ -306,6 +306,7 @@ export async function lootNearby() {
     callback: () => td
   }));
   const choice = await foundry.applications.api.DialogV2.wait({
+    classes: ["cl-dialog"],
     window: { title: t("CLOOT.Choose") },
     content: `<p>${t("CLOOT.ChooseHint")}</p>`,
     buttons,

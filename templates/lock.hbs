@@ -1,0 +1,53 @@
+<div class="cl-bag cl-bag-small {{#if bagOn}}cl-bag-on{{/if}}">
+  {{#if bagOn}}
+  <div class="cl-bag-art" style="border-image-source: url('{{assets}}/bag/body.webp')"></div>
+  <span class="cl-medal cl-medal-plain"><i class="fa-solid fa-lock"></i></span>
+  <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
+  {{/if}}
+
+  <section class="corpse-loot-body bag-panel" {{#if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
+  {{#if gone}}
+    <p class="bag-notice">{{localize "CLOOT.Err.NoDoor"}}</p>
+  {{else}}
+    <header class="bag-head">
+      <div class="bag-title">
+        <h2>{{localize "CLOOT.Door.Title"}}</h2>
+        <p class="bag-sub">{{#if open}}<i class="fa-solid fa-lock-open"></i> {{localize "CLOOT.Door.IsOpen"}}{{else}}<i class="fa-solid fa-lock"></i> {{localize "CLOOT.Door.Locked"}}{{/if}}{{#if looterName}} · {{looterName}}{{/if}}</p>
+      </div>
+    </header>
+
+    <ul class="bag-rows">
+      {{#if hasKeyOption}}
+      <li class="bag-row bag-task">
+        <span class="bag-ico bag-ico-fa"><i class="fa-solid fa-key"></i></span>
+        <span class="bag-name">
+          {{localize "CLOOT.Door.UseKey"}}
+          <small>{{#if hasKey}}{{localize "CLOOT.Door.HaveKey"}}{{else}}{{localize "CLOOT.Door.NoKey"}}{{/if}}</small>
+        </span>
+        <span class="bag-actions">
+          <button type="button" class="bag-btn" data-action="useKey" {{#unless canKey}}disabled{{/unless}}><i class="fa-solid fa-key"></i> {{localize "CLOOT.Door.UseKey"}}</button>
+        </span>
+      </li>
+      {{/if}}
+      {{#if hasPickOption}}
+      <li class="bag-row bag-task">
+        <span class="bag-ico bag-ico-fa"><i class="fa-solid fa-lock-open"></i></span>
+        <span class="bag-name">
+          {{localize "CLOOT.Door.Pick"}}
+          <small>
+            {{localize "CLOOT.Door.Skill"}}
+            {{#if needTool}} · {{#if hasTools}}{{localize "CLOOT.Door.ToolOk"}}{{else}}{{localize "CLOOT.Door.NeedTools"}}{{/if}}{{/if}}
+            {{#if limited}} · {{#if noTries}}{{localize "CLOOT.Door.NoTriesLeft"}}{{else}}{{localize "CLOOT.Door.TriesLeft"}}: {{left}}{{/if}}{{/if}}
+          </small>
+        </span>
+        <span class="bag-actions">
+          <button type="button" class="bag-btn" data-action="pickLock" {{#unless canPick}}disabled{{/unless}}><i class="fa-solid fa-dice-d20"></i> {{localize "CLOOT.Harvest.Roll"}}</button>
+        </span>
+      </li>
+      {{/if}}
+    </ul>
+
+    {{#if message}}<p class="bag-notice">{{message}}</p>{{/if}}
+  {{/if}}
+  </section>
+</div>

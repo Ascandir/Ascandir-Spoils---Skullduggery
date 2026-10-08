@@ -30,7 +30,8 @@ import {
   normalizeLock,
   lockHasOptions,
   findThievesTools,
-  findKey
+  findKey,
+  triesLeft
 } from "./rules.mjs";
 
 const t = (key, data) => (data ? game.i18n.format(key, data) : game.i18n.localize(key));
@@ -896,7 +897,8 @@ function doorContext(user, p) {
 }
 
 async function unlockDoor(ctx, how) {
-  await ctx.wall.update({ ds: CONST.WALL_DOOR_STATES.CLOSED });
+  // offen: die Versuchszähler gelten nur für das jeweils aktuelle Schloss
+  await ctx.wall.update({ ds: CONST.WALL_DOOR_STATES.CLOSED, [`flags.${MODULE_ID}.-=attempts`]: null });
   await ChatMessage.create({
     content: `<div class="corpse-loot-chat"><p>${how}</p></div>`,
     speaker: { alias: ctx.looter.name }
@@ -918,9 +920,15 @@ export async function doorHandle(user, op, p) {
   // Schloss knacken: doorCheck (darf er?) und doorPick (Wurf auswerten)
   if (!ctx.lock.dc) return fail("CLOOT.Err.NotPickable");
   if (ctx.lock.needTool && !findThievesTools(items)) return fail("CLOOT.Err.NeedThievesTools");
-  if (op === "doorCheck") return { ok: true, skill: "slt" };
+  const attempts = ctx.wall.getFlag(MODULE_ID, "attempts") ?? {};
+  const actorId = ctx.looter.actor.id;
+  const left = triesLeft(ctx.lock, attempts, actorId);
+  if (left === 0) return fail("CLOOT.Err.NoTries");
+  if (op === "doorCheck") return { ok: true, skill: "slt", left };
   if (op === "doorPick") {
     if (!isValidTotal(p.total)) return fail("CLOOT.Err.Internal");
+    // Gezählt wird der tatsächliche Wurf, nicht das Öffnen des Fensters
+    if (ctx.lock.maxTries) await ctx.wall.update({ [`flags.${MODULE_ID}.attempts.${actorId}`]: (Number(attempts[actorId]) || 0) + 1 });
     const success = pickpocketSucceeded(ctx.lock.dc, p.total);
     if (success) {
       await unlockDoor(ctx, t("CLOOT.Chat.DoorPickOk", { who: escapeHtml(ctx.looter.name) }));
@@ -930,7 +938,7 @@ export async function doorHandle(user, op, p) {
         speaker: { alias: ctx.looter.name }
       });
     }
-    return { ok: true, success };
+    return { ok: true, success, left: success ? null : left === null ? null : left - 1 };
   }
   return fail("CLOOT.Err.Internal");
 }

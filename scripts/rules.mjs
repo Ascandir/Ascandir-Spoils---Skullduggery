@@ -290,6 +290,7 @@ export function normalizeLock(raw = {}) {
   return {
     dc: posInt(raw?.dc),
     needTool: raw?.needTool !== false,
+    maxTries: posInt(raw?.maxTries),
     keyName: String(raw?.keyName ?? "").trim(),
     keyUuid: String(raw?.keyUuid ?? "").trim()
   };
@@ -332,3 +333,10 @@ export function pickpocketGrant(thieves, actorId) {
 
 /** Hat die Spielleitung dem Dieb schon irgendetwas freigegeben? */
 export const pickpocketHasGrant = (g) => g.all || g.items.size > 0 || g.coins;
+
+/** Wie viele Versuche hat dieser Charakter an der Tür noch? null = unbegrenzt. */
+export function triesLeft(lock, attempts, actorId) {
+  if (!lock?.maxTries) return null;
+  const used = Math.max(0, Math.floor(Number(attempts?.[actorId]) || 0));
+  return Math.max(0, lock.maxTries - used);
+}

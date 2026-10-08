@@ -365,3 +365,37 @@
 .bag-chip.on { background: #6b4a16; border-color: #f0c878; color: #fff1c8; box-shadow: 0 0 6px rgba(240, 200, 120, 0.45); }
 .bag-chip:hover { border-color: #f0c878; color: #fff; }
 .bag-lock { color: var(--bag-mute); opacity: 0.7; margin: 0 0.3rem; }
+
+/* Kleine Fenster (Schloss) */
+.cl-bag-small.cl-bag-on { min-height: 330px; }
+.bag-panel button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.bag-panel button:disabled:hover { color: inherit; border-color: inherit; box-shadow: none; }
+
+/* Einfache Dialoge im Lederlook (Auswahl, Taschendiebstahl-Einstellung) */
+.application.cl-dialog {
+  background: #2a1b12 url("modules/corpse-loot/assets/bag/suede.webp"); color: #ecdcc0;
+  border: 2px solid #8a6a3a; border-radius: 10px;
+  box-shadow: 0 0 0 1px #20150e, 0 12px 32px rgba(0, 0, 0, 0.75), inset 0 0 40px rgba(0, 0, 0, 0.75);
+  font-family: "CL Text", "EB Garamond", Georgia, serif; font-size: 1.05rem;
+}
+.application.cl-dialog .window-header { background: linear-gradient(180deg, #4d3522, #2c1d13); border-bottom: 1px solid #8a6a3a; color: #f0dfb8; }
+.application.cl-dialog .window-title { font-family: "CL Title", "Cinzel", serif; letter-spacing: 0.04em; color: #f0dfb8; }
+.application.cl-dialog .window-header button { color: #d9c196; }
+.application.cl-dialog .window-content { background: none; color: #ecdcc0; }
+.application.cl-dialog label, .application.cl-dialog p { color: #ecdcc0; }
+.application.cl-dialog .hint { color: #b9a584; font-style: italic; }
+.application.cl-dialog input[type="number"], .application.cl-dialog input[type="text"] { background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(190, 150, 95, 0.4); color: #f0dfb8; border-radius: 4px; }
+.application.cl-dialog .form-footer button, .application.cl-dialog footer button {
+  background: linear-gradient(180deg, #4d3522, #2c1d13); border: 1px solid #8a6a3a; color: #ecdcc0; border-radius: 4px; font-family: "CL Text", Georgia, serif; font-size: 1.05rem;
+}
+.application.cl-dialog .form-footer button:hover, .application.cl-dialog footer button:hover { color: #fff; border-color: #f0c878; box-shadow: 0 0 8px rgba(240, 200, 120, 0.45); }
+
+/* Schloss-Abschnitt im Fenster einer Wand/Tür */
+.corpse-loot-lock {
+  margin-top: 0.6rem; padding: 0.5rem 0.8rem 0.7rem; border: 1px solid #8a6a3a; border-radius: 8px;
+  background: linear-gradient(180deg, rgba(60, 40, 24, 0.55), rgba(32, 21, 14, 0.7)); box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.5);
+}
+.corpse-loot-lock legend { padding: 0 0.5rem; font-family: "CL Title", "Cinzel", serif; letter-spacing: 0.05em; color: #d9b36a; }
+.corpse-loot-lock .hint { font-style: italic; }
+.corpse-loot-reset { flex: 0 0 auto; width: auto; padding: 0 0.7rem; border: 1px solid #8a6a3a; background: linear-gradient(180deg, #4d3522, #2c1d13); color: #ecdcc0; border-radius: 4px; cursor: pointer; }
+.corpse-loot-reset:hover { color: #fff; border-color: #f0c878; }

@@ -210,5 +210,15 @@
   "CLOOT.Door.KeyHint": "Wer einen Gegenstand mit genau diesem Namen im Inventar hat, kann die Tür damit aufschließen. Leer lassen: kein Schlüssel.",
   "CLOOT.Pick.ItemLocked": "Noch nicht freigegeben",
   "CLOOT.Pick.ItemFor": "Für diesen Dieb freigeben (Knopf antippen)",
-  "CLOOT.Pick.CoinsFor": "Münzen für diesen Dieb freigeben"
+  "CLOOT.Pick.CoinsFor": "Münzen für diesen Dieb freigeben",
+  "CLOOT.Door.MaxTries": "Versuche pro Charakter",
+  "CLOOT.Door.MaxTriesHint": "Wie oft jeder Charakter das Schloss knacken darf. Gezählt wird der Würfelwurf, nicht das Öffnen des Fensters. Leer = unbegrenzt.",
+  "CLOOT.Door.ResetTries": "Versuche zurücksetzen",
+  "CLOOT.Door.TriesReset": "Die Versuche an dieser Tür wurden zurückgesetzt.",
+  "CLOOT.Door.IsOpen": "aufgeschlossen",
+  "CLOOT.Door.Skill": "Fingerfertigkeit",
+  "CLOOT.Door.ToolOk": "Diebeswerkzeug vorhanden",
+  "CLOOT.Door.TriesLeft": "Versuche übrig",
+  "CLOOT.Door.NoTriesLeft": "keine Versuche mehr",
+  "CLOOT.Err.NoTries": "Du hast an diesem Schloss keine Versuche mehr."
 }

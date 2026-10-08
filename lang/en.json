@@ -210,5 +210,15 @@
   "CLOOT.Door.KeyHint": "Anyone carrying an item with exactly this name can unlock the door. Leave empty for no key.",
   "CLOOT.Pick.ItemLocked": "Not released yet",
   "CLOOT.Pick.ItemFor": "Release for this thief (tap the button)",
-  "CLOOT.Pick.CoinsFor": "Release the coins for this thief"
+  "CLOOT.Pick.CoinsFor": "Release the coins for this thief",
+  "CLOOT.Door.MaxTries": "Attempts per character",
+  "CLOOT.Door.MaxTriesHint": "How often each character may try to pick the lock. The roll counts, not opening the window. Empty = unlimited.",
+  "CLOOT.Door.ResetTries": "Reset attempts",
+  "CLOOT.Door.TriesReset": "The attempts on this door were reset.",
+  "CLOOT.Door.IsOpen": "unlocked",
+  "CLOOT.Door.Skill": "Sleight of Hand",
+  "CLOOT.Door.ToolOk": "thieves' tools ready",
+  "CLOOT.Door.TriesLeft": "Attempts left",
+  "CLOOT.Door.NoTriesLeft": "no attempts left",
+  "CLOOT.Err.NoTries": "You have no attempts left on this lock."
 }

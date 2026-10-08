@@ -1,4 +1,4 @@
-import { MODULE_ID, normalizeLock, lockHasOptions, findKey, findThievesTools } from "./rules.mjs";
+import { MODULE_ID, normalizeLock, lockHasOptions } from "./rules.mjs";
 import * as Service from "./service.mjs";
 
 const t = (key, data) => (data ? game.i18n.format(key, data) : game.i18n.localize(key));
@@ -51,45 +51,23 @@ async function openLockDialog(wall, lock, getLooter) {
     ui.notifications.warn(t("CLOOT.Notify.SelectToken"));
     return;
   }
-  const items = looter.actor.items.contents;
-  const hasKey = Boolean(findKey(items, lock));
-  const hasTools = !lock.needTool || Boolean(findThievesTools(items));
-
-  const lines = [`<p>${t("CLOOT.Door.Locked")}</p>`];
-  if (lock.keyName || lock.keyUuid) lines.push(`<p><i class="fa-solid fa-key"></i> ${hasKey ? t("CLOOT.Door.HaveKey") : t("CLOOT.Door.NoKey")}</p>`);
-  if (lock.dc) lines.push(`<p><i class="fa-solid fa-lock"></i> ${hasTools ? t("CLOOT.Door.CanPick") : t("CLOOT.Door.NeedTools")}</p>`);
-
-  const buttons = [];
-  if (lock.keyName || lock.keyUuid) buttons.push({ action: "key", label: t("CLOOT.Door.UseKey"), icon: "fa-solid fa-key" });
-  if (lock.dc) buttons.push({ action: "pick", label: t("CLOOT.Door.Pick"), icon: "fa-solid fa-lock-open" });
-  buttons.push({ action: "cancel", label: t("CLOOT.Door.Cancel"), icon: "fa-solid fa-xmark" });
-
-  const choice = await foundry.applications.api.DialogV2.wait({
-    window: { title: t("CLOOT.Door.Title"), icon: "fa-solid fa-door-closed" },
-    content: lines.join(""),
-    buttons,
-    rejectClose: false
-  });
-  const base = { wallUuid: wall.uuid, looterUuid: looter.uuid };
-
-  if (choice === "key") {
-    const res = await Service.request("doorKey", base);
-    if (!res.ok) ui.notifications.warn(Service.errorText(res));
+  const { LockApp } = await import("./lock-app.mjs");
+  const id = `${MODULE_ID}-lock-${wall.uuid.replaceAll(".", "-")}`;
+  const existing = foundry.applications.instances.get(id);
+  if (existing) {
+    existing.looterUuid = looter.uuid;
+    existing.render({ force: true });
+    existing.bringToFront?.();
     return;
   }
-  if (choice === "pick") {
-    const check = await Service.request("doorCheck", base);
-    if (!check.ok) {
-      ui.notifications.warn(Service.errorText(check));
-      return;
-    }
-    const rolls = await looter.actor.rollSkill({ skill: check.skill }, {}, {});
-    if (!rolls?.length) return;
-    const res = await Service.request("doorPick", { ...base, total: rolls[0].total });
-    if (!res.ok) ui.notifications.warn(Service.errorText(res));
-    else ui.notifications[res.success ? "info" : "warn"](t(res.success ? "CLOOT.Door.Success" : "CLOOT.Door.Failure"));
-  }
+  new LockApp({ wallUuid: wall.uuid, looterUuid: looter.uuid }).render({ force: true });
 }
+
+// Ändert sich die Tür (aufgeschlossen, Schloss umgestellt), zeigen offene Fenster sofort den neuen Stand
+Hooks.on("updateWall", (wall) => {
+  const app = foundry.applications.instances.get(`${MODULE_ID}-lock-${wall.uuid.replaceAll(".", "-")}`);
+  app?.render();
+});
 
 /* -------------------------------------------- */
 /*  Wand-Einstellungen (Spielleitung)            */
@@ -116,6 +94,14 @@ export function addLockFields(app, html) {
         <p class="hint">${t("CLOOT.Door.DCHint")}</p>
       </div>
       <div class="form-group">
+        <label>${t("CLOOT.Door.MaxTries")}</label>
+        <div class="form-fields">
+          <input type="number" min="1" step="1" name="flags.${MODULE_ID}.lock.maxTries" value="${lock.maxTries ?? ""}">
+          <button type="button" class="corpse-loot-reset"><i class="fa-solid fa-rotate-left"></i> ${t("CLOOT.Door.ResetTries")}</button>
+        </div>
+        <p class="hint">${t("CLOOT.Door.MaxTriesHint")}</p>
+      </div>
+      <div class="form-group">
         <label>${t("CLOOT.Door.NeedToolsLabel")}</label>
         <div class="form-fields"><input type="checkbox" name="flags.${MODULE_ID}.lock.needTool" ${lock.needTool ? "checked" : ""}></div>
       </div>
@@ -127,6 +113,12 @@ export function addLockFields(app, html) {
         </div>
         <p class="hint">${t("CLOOT.Door.KeyHint")}</p>
       </div>`;
+
+    box.querySelector(".corpse-loot-reset").addEventListener("click", async (ev) => {
+      ev.preventDefault();
+      await wall.update({ [`flags.${MODULE_ID}.-=attempts`]: null });
+      ui.notifications.info(t("CLOOT.Door.TriesReset"));
+    });
 
     const nameInput = box.querySelector("input[type=text]");
     const uuidInput = box.querySelector("input[type=hidden]");

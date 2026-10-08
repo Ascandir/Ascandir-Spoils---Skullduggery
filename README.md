@@ -1,4 +1,4 @@
-# Ascandir – Spoils & Skullduggery v0.17.0
+# Ascandir – Spoils & Skullduggery v0.18.0
 
 Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
@@ -148,3 +148,9 @@ Im Fenster einer Wand/Tür (Spielleitung) gibt es den Abschnitt **Schloss (Corps
 - **Schlüssel:** einen Gegenstand ins Feld ziehen oder den Namen eintippen. Wer einen Gegenstand mit genau diesem Namen im Inventar hat, schließt die Tür damit auf.
 
 Klickt ein Spieler auf eine Tür, die auf „Verschlossen“ steht und ein Schloss eingestellt hat, erscheint ein Fenster: Schlüssel benutzen oder Schloss knacken (Fingerfertigkeit). Bei Erfolg wird die Tür entriegelt (sie steht danach auf „Geschlossen“). Türen ohne Schloss-Einstellung verhalten sich wie bisher.
+
+### Versuche an Türen begrenzen
+
+Im Schloss-Abschnitt gibt es **Versuche pro Charakter** (leer = unbegrenzt). Gezählt wird der tatsächliche Würfelwurf, nicht das Öffnen des Fensters. Jeder Charakter hat seine eigenen Versuche. Mit dem Knopf **Versuche zurücksetzen** setzt du die Zähler zurück, bei Erfolg werden sie automatisch gelöscht. Das Fenster zeigt dem Spieler, wie viele Versuche er noch hat.
+
+Das Fenster der verschlossenen Tür nutzt denselben Lederbeutel wie das Beute-Fenster. Auch die kleinen Dialoge (Einstellung des Taschendiebstahls, Auswahl bei mehreren Leichen) und der Schloss-Abschnitt im Wand-Fenster sind im Leder-Design gehalten.
