@@ -701,10 +701,10 @@ async function harvestResolve(ctx, p) {
   const success = harvestSucceeded(entry, p.total);
   const state = { ...harvestFlag(ctx) };
   const myId = ctx.looter.actor.id;
+  const prev = state[entry.id] ?? {};
   if (success) state[entry.id] = { done: true, failed: [], counts: {} };
   else {
     // Gezählt wird der tatsächliche Wurf
-    const prev = state[entry.id] ?? {};
     state[entry.id] = {
       done: false,
       failed: [...new Set([...(prev.failed ?? []), myId])],
@@ -715,7 +715,7 @@ async function harvestResolve(ctx, p) {
   const got = success ? await grantHarvest(ctx.actor, entry) : [];
   const used = toolIsConsumed(entry, success) ? await consumeTool(ctx.looter.actor, entry) : null;
   await announceHarvest(ctx, entry, success, got, used);
-  if (success) await regrowResource(ctx, entry);
+  if (success) await regrowResource(ctx, entry, prev, myId);
   changed(ctx.corpse.uuid);
   return { ok: true, success, state: buildState(ctx) };
 }
@@ -727,19 +727,24 @@ async function harvestUnlock(ctx, p) {
   if (!entry) return fail("CLOOT.Err.NoHarvest");
   const state = { ...harvestFlag(ctx) };
   if (state[entry.id]?.done) return fail("CLOOT.Err.HarvestDone");
+  const prev = state[entry.id] ?? {};
   state[entry.id] = { done: true, failed: [], counts: {} };
   await ctx.corpse.setFlag(MODULE_ID, "harvest", state);
   await grantHarvest(ctx.actor, entry);
-  await regrowResource(ctx, entry);
+  await regrowResource(ctx, entry, prev, null);
   changed(ctx.corpse.uuid);
   return { ok: true, state: buildState(ctx) };
 }
 
 /** Ressourcen-Container: nach jeder erfolgreichen Ernte wieder erntbar und neu gewürfelt. */
-async function regrowResource(ctx, entry) {
+async function regrowResource(ctx, entry, prev = {}, actorId = null) {
   if (ctx.actor?.system?.style !== "resource") return;
   try {
-    await ctx.corpse.update({ [`flags.${MODULE_ID}.harvest.-=${entry.id}`]: null });
+    // Versuche bleiben erhalten: auch eine erfolgreiche Ernte verbraucht einen Versuch
+    const counts = { ...(prev.counts ?? {}) };
+    for (const id of prev.failed ?? []) counts[id] = harvestAttempts(prev, id);
+    if (actorId) counts[actorId] = harvestAttempts(prev, actorId) + 1;
+    await ctx.corpse.update({ [`flags.${MODULE_ID}.harvest.${entry.id}`]: { done: false, failed: [], counts } });
     await rollLoot(ctx.corpse, { force: true, quiet: true });
   } catch (e) {
     console.warn(`${MODULE_ID} | regrow`, e);
