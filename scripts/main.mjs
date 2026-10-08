@@ -288,8 +288,10 @@ export async function openAscandirMenu(doc) {
     // Token-Konfiguration / Token-Actor: Einstellungen gelten für diesen Token. Actor-Bogen: für die Vorlage (neue Token).
     const target = isTokenDoc ? doc : actor.isToken && actor.token ? actor.token : base;
     const isBox = base?.type === CONTAINER_TYPE;
+    const canTable = base?.type === "npc" || isBox;
     const buttons = [
-      { action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice", disabled: base?.type !== "npc" && !isBox },
+      { action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice", disabled: !canTable },
+      { action: "harvest", label: t("CLOOT.Menu.Harvest"), icon: "fa-solid fa-wheat-awn", disabled: !canTable },
       isBox
         ? { action: "lock", label: t("CLOOT.Menu.Lock"), icon: "fa-solid fa-lock" }
         : { action: "thief", label: t("CLOOT.Menu.Thievery"), icon: "fa-solid fa-hand-holding" }
@@ -297,7 +299,7 @@ export async function openAscandirMenu(doc) {
 
     const choice = await foundry.applications.api.DialogV2.wait({
       classes: ["cl-dialog", "cl-menu"],
-      position: { width: 440 },
+      position: { width: 560 },
       window: { title: t("CLOOT.Menu.Title"), icon: "fa-solid fa-skull" },
       content: `<p>${t("CLOOT.Menu.Intro", { name: foundry.utils.escapeHTML(actor.name) })}</p>`,
       buttons,
@@ -305,6 +307,7 @@ export async function openAscandirMenu(doc) {
     });
     if (!choice) return;
     if (choice === "table") return editTable(base);
+    if (choice === "harvest") return editHarvest(base);
     if (choice === "thief") return editThievery(target);
     if (choice === "lock") return editLock(target);
   } catch (err) {

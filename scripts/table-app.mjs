@@ -202,7 +202,7 @@ export class LootTableApp extends Base {
   static async onAddEntry() {
     const entries = this.entries;
     entries.push(
-      ...normalizeHarvest([{ label: game.i18n.localize("CLOOT.Harvest.NewEntry"), skill: "sur", dc: 10, oneTry: true, items: [] }])
+      ...normalizeHarvest([{ label: game.i18n.localize("CLOOT.Harvest.NewEntry"), skill: "sur", dc: 10, tries: 1, items: [] }])
     );
     await this.saveHarvest(entries);
     this.render();

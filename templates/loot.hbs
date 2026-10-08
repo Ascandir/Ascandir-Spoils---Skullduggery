@@ -115,7 +115,7 @@
           </span>
           <span class="bag-name">
             {{label}}
-            <small>{{skillLabel}}{{#if isGM}} · SG {{dc}}{{/if}}{{#if needTool}} · {{localize "CLOOT.Harvest.Tool"}}: {{toolName}}{{#if consumeTool}} ({{localize "CLOOT.Harvest.Consumed"}}){{/if}}{{/if}}</small>
+            <small>{{skillLabel}}{{#if isGM}} · SG {{dc}}{{/if}}{{#if limited}} · {{localize "CLOOT.Door.TriesLeft"}}: {{triesLeft}}{{/if}}{{#if needTool}} · {{localize "CLOOT.Harvest.Tool"}}: {{toolName}}{{#if consumeTool}} ({{localize "CLOOT.Harvest.Consumed"}}){{/if}}{{/if}}</small>
           </span>
           <span class="bag-actions">
             {{#if canTry}}<button type="button" class="bag-btn" data-action="harvest" data-entry="{{id}}"><i class="fa-solid fa-dice-d20"></i> {{localize "CLOOT.Harvest.Roll"}}</button>{{/if}}

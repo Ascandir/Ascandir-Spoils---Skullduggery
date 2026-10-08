@@ -175,7 +175,7 @@ export function describeRoll(result) {
 /**
  * Eine Ernte-Stufe: Der Spieler muss eine Fertigkeitsprobe schaffen (und optional ein Werkzeug besitzen),
  * erst dann fällt der Ertrag der Stufe an.
- * { id, label, skill, dc, needTool, toolName, oneTry, items: [{uuid,name,img,min,max}] }
+ * { id, label, skill, dc, needTool, toolName, tries, items: [{uuid,name,img,min,max}] }
  */
 export function normalizeHarvest(raw) {
   const list = Array.isArray(raw) ? raw : Object.values(raw ?? {});
@@ -197,7 +197,8 @@ export function normalizeHarvest(raw) {
         toolName: String(e.toolName ?? "").trim(),
         consumeTool: e.consumeTool === true || e.consumeTool === "true" || e.consumeTool === "on",
         consumeOn: e.consumeOn === "attempt" ? "attempt" : "success",
-        oneTry: e.oneTry !== false && e.oneTry !== "false",
+        // Versuche pro Charakter; leer = unbegrenzt. Alte Einträge mit "ein Versuch" bleiben bei 1.
+        tries: e.tries !== undefined ? posInt(e.tries) : e.oneTry !== false && e.oneTry !== "false" ? 1 : null,
         items
       };
     });
@@ -227,8 +228,20 @@ export function toolIsConsumed(entry, success) {
  */
 export function harvestStatus(entry, state, actorId) {
   if (state?.done) return "done";
-  if (entry.oneTry && state?.failed?.includes(actorId)) return "failed";
+  if (entry.tries && harvestAttempts(state, actorId) >= entry.tries) return "failed";
   return "open";
+}
+
+/** Bisherige Versuche eines Charakters (ältere Stände kannten nur die Liste der Gescheiterten). */
+export function harvestAttempts(state, actorId) {
+  const n = Number(state?.counts?.[actorId]);
+  if (Number.isFinite(n) && n > 0) return n;
+  return state?.failed?.includes(actorId) ? 1 : 0;
+}
+
+/** Verbleibende Versuche, null = unbegrenzt. */
+export function harvestTriesLeft(entry, state, actorId) {
+  return entry.tries ? Math.max(0, entry.tries - harvestAttempts(state, actorId)) : null;
 }
 
 export const harvestSucceeded = (entry, total) => Number(total) >= entry.dc;

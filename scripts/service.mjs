@@ -20,6 +20,8 @@ import {
   findTool,
   toolIsConsumed,
   harvestStatus,
+  harvestAttempts,
+  harvestTriesLeft,
   harvestSucceeded,
   isValidTotal,
   pickpocketDc,
@@ -658,6 +660,8 @@ function harvestViews(ctx) {
       isDone: status === "done",
       isFailed: status === "failed",
       isOpen: status === "open",
+      limited: Boolean(e.tries) && status !== "done",
+      triesLeft: harvestTriesLeft(e, state[e.id], myId),
       canTry: ctx.canTake && status === "open",
       dc: ctx.isGM ? e.dc : null,
       isGM: ctx.isGM
@@ -692,10 +696,16 @@ async function harvestResolve(ctx, p) {
   const { entry } = gate;
   const success = harvestSucceeded(entry, p.total);
   const state = { ...harvestFlag(ctx) };
-  if (success) state[entry.id] = { done: true, failed: [] };
+  const myId = ctx.looter.actor.id;
+  if (success) state[entry.id] = { done: true, failed: [], counts: {} };
   else {
+    // Gezählt wird der tatsächliche Wurf
     const prev = state[entry.id] ?? {};
-    state[entry.id] = { done: false, failed: [...new Set([...(prev.failed ?? []), ctx.looter.actor.id])] };
+    state[entry.id] = {
+      done: false,
+      failed: [...new Set([...(prev.failed ?? []), myId])],
+      counts: { ...(prev.counts ?? {}), [myId]: harvestAttempts(prev, myId) + 1 }
+    };
   }
   await ctx.corpse.setFlag(MODULE_ID, "harvest", state);
   const got = success ? await grantHarvest(ctx.actor, entry) : [];
@@ -712,7 +722,7 @@ async function harvestUnlock(ctx, p) {
   if (!entry) return fail("CLOOT.Err.NoHarvest");
   const state = { ...harvestFlag(ctx) };
   if (state[entry.id]?.done) return fail("CLOOT.Err.HarvestDone");
-  state[entry.id] = { done: true, failed: [] };
+  state[entry.id] = { done: true, failed: [], counts: {} };
   await ctx.corpse.setFlag(MODULE_ID, "harvest", state);
   await grantHarvest(ctx.actor, entry);
   changed(ctx.corpse.uuid);

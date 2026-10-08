@@ -263,5 +263,8 @@
   "CLOOT.Container.Style": "Appearance",
   "CLOOT.Container.StyleChest": "Chest",
   "CLOOT.Container.StyleSack": "Sack",
-  "CLOOT.TitlePlayer": "Loot"
+  "CLOOT.TitlePlayer": "Loot",
+  "CLOOT.Harvest.Tries": "Attempts",
+  "CLOOT.Harvest.TriesHint": "How often each character may try this harvest. Rolls are counted. Empty = unlimited.",
+  "CLOOT.Menu.Harvest": "Harvest"
 }

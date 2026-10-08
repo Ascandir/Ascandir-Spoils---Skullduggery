@@ -263,5 +263,8 @@
   "CLOOT.Container.Style": "Aussehen",
   "CLOOT.Container.StyleChest": "Truhe",
   "CLOOT.Container.StyleSack": "Sack",
-  "CLOOT.TitlePlayer": "Beute"
+  "CLOOT.TitlePlayer": "Beute",
+  "CLOOT.Harvest.Tries": "Versuche",
+  "CLOOT.Harvest.TriesHint": "Wie oft jeder Charakter diese Ernte versuchen darf. Gezählt wird der Wurf. Leer = unbegrenzt.",
+  "CLOOT.Menu.Harvest": "Ernte"
 }

@@ -138,10 +138,8 @@
             <label class="clt-mini"><span>{{localize "CLOOT.Harvest.DC"}}</span>
               <div class="clt-range clt-single"><input type="number" min="0" name="entries.{{idx}}.dc" value="{{dc}}"></div>
             </label>
-            <label class="clt-switch clt-switch-field">
-              <input type="checkbox" name="entries.{{idx}}.oneTry" {{#if oneTry}}checked{{/if}}>
-              <span class="clt-switch-ui"></span>
-              <span>{{localize "CLOOT.Harvest.OneTry"}}</span>
+            <label class="clt-mini" data-tooltip="CLOOT.Harvest.TriesHint"><span>{{localize "CLOOT.Harvest.Tries"}}</span>
+              <div class="clt-range clt-single"><input type="number" min="1" step="1" name="entries.{{idx}}.tries" value="{{tries}}" placeholder="∞"></div>
             </label>
           </div>
 
