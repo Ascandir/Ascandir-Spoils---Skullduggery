@@ -256,5 +256,11 @@
   "CLOOT.Box.IntroProto": "Applies to all containers placed from this template from now on. Change tokens already on the map through their menu.",
   "CLOOT.Box.Locked": "Locked",
   "CLOOT.Box.Closed": "This container is locked.",
-  "CLOOT.Box.OpenLock": "Open lock"
+  "CLOOT.Box.OpenLock": "Open lock",
+  "CLOOT.Chat.BoxKey": "{who} unlocks “{target}” with “{key}”.",
+  "CLOOT.Chat.BoxPickOk": "{who} picks the lock of “{target}”.",
+  "CLOOT.Chat.BoxPickFail": "{who} fails to pick the lock of “{target}”.",
+  "CLOOT.Container.Style": "Appearance",
+  "CLOOT.Container.StyleChest": "Chest",
+  "CLOOT.Container.StyleSack": "Sack"
 }

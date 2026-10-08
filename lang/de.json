@@ -256,5 +256,11 @@
   "CLOOT.Box.IntroProto": "Gilt für alle künftig platzierten Behälter dieser Vorlage. Bereits platzierte Token stellst du über ihr Menü ein.",
   "CLOOT.Box.Locked": "Zugesperrt",
   "CLOOT.Box.Closed": "Dieser Behälter ist verschlossen.",
-  "CLOOT.Box.OpenLock": "Schloss öffnen"
+  "CLOOT.Box.OpenLock": "Schloss öffnen",
+  "CLOOT.Chat.BoxKey": "{who} schließt „{target}“ mit „{key}“ auf.",
+  "CLOOT.Chat.BoxPickOk": "{who} knackt das Schloss von „{target}“.",
+  "CLOOT.Chat.BoxPickFail": "{who} scheitert am Schloss von „{target}“.",
+  "CLOOT.Container.Style": "Aussehen",
+  "CLOOT.Container.StyleChest": "Truhe",
+  "CLOOT.Container.StyleSack": "Sack"
 }

@@ -72,6 +72,7 @@ export class LootApp extends Base {
     return {
       assets: `modules/${MODULE_ID}/assets`,
       bagOn: game.settings.get(MODULE_ID, "bag") !== false,
+      isChest: game.settings.get(MODULE_ID, "bag") !== false && state?.boxStyle === "chest",
       typeIcon: typeIcon(typeKey),
       typeKey: TYPE_MEDALS.has(typeKey) ? typeKey : "",
       typeLabel: fromConfig ? game.i18n.localize(fromConfig) : "",

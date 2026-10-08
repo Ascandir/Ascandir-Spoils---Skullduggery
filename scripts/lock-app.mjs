@@ -18,7 +18,7 @@ export class LockApp extends Base {
   /** @override */
   static DEFAULT_OPTIONS = {
     classes: ["corpse-loot"],
-    position: { width: 640, height: "auto" },
+    position: { width: 760, height: "auto" },
     window: { icon: "fa-solid fa-lock", resizable: false },
     actions: {
       useKey: LockApp.onKey,

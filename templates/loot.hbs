@@ -1,11 +1,15 @@
-<div class="cl-bag {{#if bagOn}}cl-bag-on{{/if}}">
-  {{#if bagOn}}
+<div class="cl-bag {{#if isChest}}cl-chestwin cl-lock-on{{else if bagOn}}cl-bag-on{{/if}}">
+  {{#if isChest}}
+  <div class="cl-plate" style="border-image-source: url('{{assets}}/lock/frame.webp')"></div>
+  <img class="cl-sprite" src="{{assets}}/chest/shield.webp" alt="">
+  <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}"></button>
+  {{else if bagOn}}
   <div class="cl-bag-art" style="border-image-source: url('{{assets}}/bag/body.webp')"></div>
   {{#if typeKey}}<img class="cl-medal" src="{{assets}}/types/{{typeKey}}.webp" alt="{{typeLabel}}" data-tooltip="{{typeLabel}}">{{else}}<span class="cl-medal cl-medal-plain"><i class="fa-solid fa-sack-dollar"></i></span>{{/if}}
   <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
   {{/if}}
 
-  <section class="corpse-loot-body bag-panel" {{#if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
+  <section class="corpse-loot-body bag-panel" {{#if isChest}}style="background-image: linear-gradient(180deg, rgba(6,6,9,.55), rgba(10,10,14,.7)), url('{{assets}}/lock/iron.webp')"{{else if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
   {{#if error}}
     <p class="bag-notice">{{error}}</p>
     <div class="bag-foot"><button type="button" class="bag-btn" data-action="refresh"><i class="fa-solid fa-rotate"></i> {{localize "CLOOT.Refresh"}}</button></div>

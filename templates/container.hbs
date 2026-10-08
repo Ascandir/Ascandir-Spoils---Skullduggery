@@ -15,6 +15,15 @@
 
   <p class="hint">{{localize "CLOOT.Container.Hint"}}</p>
 
+  <div class="form-group">
+    <label>{{localize "CLOOT.Container.Style"}}</label>
+    <div class="form-fields">
+      <select name="system.style" {{#unless editable}}disabled{{/unless}}>
+        {{#each styles}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+      </select>
+    </div>
+  </div>
+
   <div class="form-group stacked">
     <label>{{localize "CLOOT.Container.Description"}}</label>
     <textarea name="system.description" rows="3" {{#unless editable}}disabled{{/unless}}>{{system.description}}</textarea>

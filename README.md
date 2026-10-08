@@ -1,4 +1,4 @@
-# Ascandir – Spoils & Skullduggery v0.20.0
+# Ascandir – Spoils & Skullduggery v0.20.1
 
 Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
@@ -170,3 +170,5 @@ Beim Anlegen eines Actors gibt es den neuen Typ **Container**. Er hat einen eige
 - **Loottable**: wie bei NSC; jeder platzierte Token würfelt beim Platzieren seine eigene Beute (Token nicht mit dem Actor verknüpfen).
 - **Schloss** (Spielleitung, unter den drei Punkten → Ascandir, im Token-HUD oder im Bogen): zugesperrt ja/nein, SG zum Knacken, Versuche pro Charakter, Diebeswerkzeug nötig, Schlüssel (Gegenstand hineinziehen oder Namen eintippen).
 - Spieler öffnen den Container wie eine Leiche (Doppelklick, Taste L). Ist er zugesperrt, erscheint das Eisenschloss-Fenster mit Schlüssel und Schloss knacken. Erst danach sieht man den Inhalt.
+
+Im Container-Bogen wählst du das **Aussehen**: *Truhe* (Holz mit Eisenbeschlägen und Messingschild) oder *Sack* (Lederbeutel). Das Schloss-Fenster ist ein Vorhängeschloss in Holz und Eisen und gilt für Türen und Container. Der Chat nennt bei Containern den Namen des Tokens statt "Tür".

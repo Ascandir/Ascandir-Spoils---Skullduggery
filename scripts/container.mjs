@@ -8,6 +8,7 @@ class ContainerData extends foundry.abstract.TypeDataModel {
     const f = foundry.data.fields;
     const coin = () => new f.NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 0 });
     return {
+      style: new f.StringField({ required: true, blank: false, choices: ["chest", "sack"], initial: "chest" }),
       description: new f.HTMLField({ required: false, blank: true }),
       currency: new f.SchemaField(Object.fromEntries(COINS.map((k) => [k, coin()])))
     };
@@ -71,31 +72,12 @@ function makeSheet(ActorSheetV2, HandlebarsApplicationMixin) {
         coins: COINS.map((k) => ({ key: k, value: actor.system.currency?.[k] ?? 0, label: t(`CLOOT.Cfg.Coin.${k}`) })),
         items,
         hasItems: items.length > 0,
+        styles: [
+          { value: "chest", label: t("CLOOT.Container.StyleChest"), selected: (actor.system.style ?? "chest") === "chest" },
+          { value: "sack", label: t("CLOOT.Container.StyleSack"), selected: actor.system.style === "sack" }
+        ],
         hasTable: Boolean(actor.getFlag(MODULE_ID, "table"))
       };
-    }
-
-    async _onRender(context, options) {
-      await super._onRender(context, options);
-      const zone = this.element.querySelector("[data-drop]");
-      if (!zone || !this.isEditable) return;
-      zone.addEventListener("dragover", (ev) => ev.preventDefault());
-      zone.addEventListener("drop", async (ev) => {
-        ev.preventDefault();
-        let data;
-        try {
-          data = JSON.parse(ev.dataTransfer.getData("text/plain"));
-        } catch {
-          return;
-        }
-        if (data?.type !== "Item" || !data.uuid) return;
-        const item = await fromUuid(data.uuid);
-        if (!item) return;
-        const obj = item.toObject();
-        delete obj._id;
-        if (obj.system && "container" in obj.system) obj.system.container = null;
-        await this.document.createEmbeddedDocuments("Item", [obj]);
-      });
     }
 
     static async onEditImage() {

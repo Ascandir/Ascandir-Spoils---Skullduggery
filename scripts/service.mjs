@@ -332,6 +332,7 @@ function buildState(ctx) {
     requireRelease: ctx.requireRelease,
     locked: ctx.locked && !ctx.pick && !ctx.boxLocked,
     isBox: ctx.isBox,
+    boxStyle: ctx.isBox ? ctx.actor.system?.style ?? "chest" : "",
     boxLocked: ctx.boxLocked,
     boxLockedGM: ctx.isBox && ctx.isGM && Boolean(ctx.corpse.getFlag(MODULE_ID, "boxLocked")),
     canTake: ctx.canTake,
@@ -947,7 +948,7 @@ export async function doorHandle(user, op, p) {
   if (op === "doorKey") {
     const key = findKey(items, ctx.lock);
     if (!key) return fail("CLOOT.Err.NoKey");
-    await unlockDoor(ctx, t("CLOOT.Chat.DoorKey", { who: escapeHtml(ctx.looter.name), key: escapeHtml(key.name) }));
+    await unlockDoor(ctx, t(ctx.isBox ? "CLOOT.Chat.BoxKey" : "CLOOT.Chat.DoorKey", { who: escapeHtml(ctx.looter.name), key: escapeHtml(key.name), target: escapeHtml(ctx.wall.name ?? "") }));
     return { ok: true, success: true };
   }
 
@@ -965,10 +966,10 @@ export async function doorHandle(user, op, p) {
     if (ctx.lock.maxTries) await ctx.wall.update({ [`flags.${MODULE_ID}.attempts.${actorId}`]: (Number(attempts[actorId]) || 0) + 1 });
     const success = pickpocketSucceeded(ctx.lock.dc, p.total);
     if (success) {
-      await unlockDoor(ctx, t("CLOOT.Chat.DoorPickOk", { who: escapeHtml(ctx.looter.name) }));
+      await unlockDoor(ctx, t(ctx.isBox ? "CLOOT.Chat.BoxPickOk" : "CLOOT.Chat.DoorPickOk", { who: escapeHtml(ctx.looter.name), target: escapeHtml(ctx.wall.name ?? "") }));
     } else {
       await ChatMessage.create({
-        content: `<div class="corpse-loot-chat"><p>${t("CLOOT.Chat.DoorPickFail", { who: escapeHtml(ctx.looter.name) })}</p></div>`,
+        content: `<div class="corpse-loot-chat"><p>${t(ctx.isBox ? "CLOOT.Chat.BoxPickFail" : "CLOOT.Chat.DoorPickFail", { who: escapeHtml(ctx.looter.name), target: escapeHtml(ctx.wall.name ?? "") })}</p></div>`,
         speaker: { alias: ctx.looter.name }
       });
     }
