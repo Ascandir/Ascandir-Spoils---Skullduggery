@@ -1,4 +1,4 @@
-# Ascandir – Spoils & Skullduggery v0.16.0
+# Ascandir – Spoils & Skullduggery v0.17.0
 
 Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
@@ -134,7 +134,8 @@ Ein Spieler kann einen lebenden NSC oder Spielercharakter (eines anderen Spieler
 Er würfelt Fingerfertigkeit gegen den SG. Der SG ist standardmäßig die **passive Wahrnehmung** des Ziels, die Spielleitung kann im Beute-Fenster (Zahnrad im Abschnitt „Taschendiebstahl“) einen eigenen SG setzen oder das Stehlen für diesen Token ausschalten.
 
 - Misserfolg: Der Dieb wird erwischt (Chatnachricht für alle), mehr Versuche gibt es nicht.
-- Erfolg: Der Dieb sieht die Beute, kann aber nichts nehmen. Die Spielleitung bekommt eine private Chatnachricht und gibt die Beute im Beute-Fenster **pro Dieb** frei oder sperrt sie wieder.
+- Erfolg: Der Dieb sieht alles, was das Ziel trägt, kann aber nichts nehmen. Die Spielleitung bekommt eine private Chatnachricht und entscheidet im Beute-Fenster, **was der Dieb wirklich erwischt**: An jedem Gegenstand (und an den Münzen) sitzen kleine runde Knöpfe mit den Anfangsbuchstaben der erfolgreichen Diebe. Ein Klick gibt den Gegenstand für diesen Dieb frei, ein zweiter sperrt ihn wieder. „Alles freigeben“ in der Taschendiebstahl-Zeile gibt alles auf einmal frei.
+- Diebesgut landet immer im Inventar des Diebes (nie in der Gruppe). Gemeldet wird es nur der Spielleitung und dem Dieb.
 - Die Spielleitung kann einen Versuch zurücksetzen.
 - Die Einstellung „Taschendiebstahl erlauben“ in den Moduleinstellungen gilt als Standard für alle Token.
 

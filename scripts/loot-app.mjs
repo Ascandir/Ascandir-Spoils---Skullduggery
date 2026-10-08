@@ -35,6 +35,8 @@ export class LootApp extends Base {
       pickConfig: LootApp.onPickConfig,
       pickGrant: LootApp.onPickGrant,
       pickReset: LootApp.onPickReset,
+      pickItem: LootApp.onPickItem,
+      pickCoins: LootApp.onPickCoins,
       refresh: LootApp.onRefresh
     }
   };
@@ -221,6 +223,14 @@ export class LootApp extends Base {
 
   static async onPickGrant(event, target) {
     await this.act("pickGrant", { actorId: target.dataset.actor });
+  }
+
+  static async onPickItem(event, target) {
+    await this.act("pickItem", { actorId: target.dataset.actor, itemId: target.closest("[data-item-id]")?.dataset.itemId });
+  }
+
+  static async onPickCoins(event, target) {
+    await this.act("pickCoins", { actorId: target.dataset.actor });
   }
 
   static async onPickReset(event, target) {

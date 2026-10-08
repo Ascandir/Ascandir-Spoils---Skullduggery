@@ -319,3 +319,16 @@ export function keyMatches(item, lock) {
   return false;
 }
 export const findKey = (items, lock) => items.find((i) => keyMatches(i, lock)) ?? null;
+
+/**
+ * Was darf dieser Dieb nehmen? thieves[actorId] = { status, granted (alles), items: [Item-IDs], coins }
+ * @returns {{ all: boolean, items: Set<string>, coins: boolean }}
+ */
+export function pickpocketGrant(thieves, actorId) {
+  const t = thieves?.[actorId];
+  if (!t || t.status !== "success") return { all: false, items: new Set(), coins: false };
+  return { all: Boolean(t.granted), items: new Set(Array.isArray(t.items) ? t.items : []), coins: Boolean(t.coins) };
+}
+
+/** Hat die Spielleitung dem Dieb schon irgendetwas freigegeben? */
+export const pickpocketHasGrant = (g) => g.all || g.items.size > 0 || g.coins;

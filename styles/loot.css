@@ -360,3 +360,8 @@
 .bag-pick-row { display: flex; align-items: center; gap: 0.5rem; }
 .bag-pick-row .bag-name { flex: 1 1 auto; }
 .corpse-loot-lock { margin-top: 0.5rem; }
+.bag-chips { display: inline-flex; align-items: center; gap: 0.2rem; color: var(--bag-mute); }
+.bag-chip { min-width: 1.7rem; height: 1.7rem; padding: 0 0.3rem; margin: 0; border-radius: 50%; border: 1px solid var(--bag-line); background: rgba(0, 0, 0, 0.35); color: var(--bag-mute); font: 600 0.8rem var(--bag-title); line-height: 1; cursor: pointer; }
+.bag-chip.on { background: #6b4a16; border-color: #f0c878; color: #fff1c8; box-shadow: 0 0 6px rgba(240, 200, 120, 0.45); }
+.bag-chip:hover { border-color: #f0c878; color: #fff; }
+.bag-lock { color: var(--bag-mute); opacity: 0.7; margin: 0 0.3rem; }

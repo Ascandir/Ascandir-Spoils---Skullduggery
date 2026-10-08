@@ -24,7 +24,8 @@ import {
   pickpocketDc,
   pickpocketSucceeded,
   pickpocketStatus,
-  pickpocketGranted,
+  pickpocketGrant,
+  pickpocketHasGrant,
   pickpocketAllowed,
   normalizeLock,
   lockHasOptions,
@@ -216,9 +217,9 @@ function resolve(user, p) {
     if (corpse.actor.testUserPermission(user, "OWNER") || looter.id === corpse.id) return fail("CLOOT.Err.NotDead");
     const thieves = pickCfg.thieves ?? {};
     const id = looter.actor.id;
-    pick = { cfg: pickCfg, id, status: pickpocketStatus(thieves, id), granted: pickpocketGranted(thieves, id) };
+    pick = { cfg: pickCfg, id, status: pickpocketStatus(thieves, id), ...pickpocketGrant(thieves, id) };
     hidden = pick.status !== "success";
-    locked = !pick.granted;
+    locked = pick.status !== "success";
   }
 
   return { ok: true, user, isGM, alive, corpse, actor: corpse.actor, looter, canTake: canTake && !locked, locked, hidden, pick, released, requireRelease };
@@ -263,6 +264,10 @@ export async function gmHandle(user, op, p) {
       return pickSet(ctx, p);
     case "pickGrant":
       return pickGrant(ctx, p);
+    case "pickItem":
+      return pickItem(ctx, p);
+    case "pickCoins":
+      return pickCoins(ctx, p);
     case "pickReset":
       return pickReset(ctx, p);
     default:
@@ -271,16 +276,30 @@ export async function gmHandle(user, op, p) {
 }
 
 function buildState(ctx) {
-  const group = ctx.looter ? partyFor(ctx.looter.actor) : null;
+  const group = ctx.looter && !ctx.pick ? partyFor(ctx.looter.actor) : null;
   const hide = ctx.hidden ?? ctx.locked;
+  const pickCfg = ctx.alive && ctx.isGM ? ctx.corpse.getFlag(MODULE_ID, "pick") ?? {} : null;
+  const successThieves = pickCfg
+    ? Object.entries(pickCfg.thieves ?? {})
+        .filter(([, v]) => v?.status === "success")
+        .map(([id, v]) => ({ actorId: id, name: game.actors.get(id)?.name ?? "?", short: (game.actors.get(id)?.name ?? "?").slice(0, 2), all: Boolean(v.granted), items: v.items ?? [], coins: Boolean(v.coins) }))
+    : [];
   const items = hide
     ? []
-    : ctx.actor.items
-        .filter(isLootableItem)
-        .map((i) => ({ ...buildItemView(i, { isGM: ctx.isGM }), canTake: ctx.canTake, canGroup: ctx.canTake && Boolean(group), canManage: ctx.isGM }));
+    : ctx.actor.items.filter(isLootableItem).map((i) => {
+        const can = mayTakeItem(ctx, i);
+        return {
+          ...buildItemView(i, { isGM: ctx.isGM }),
+          canTake: can,
+          canGroup: can && Boolean(group),
+          canManage: ctx.isGM,
+          grants: successThieves.map((th) => ({ actorId: th.actorId, name: th.name, short: th.short, on: th.all || th.items.includes(i.id) }))
+        };
+      });
   const coins = hide ? [] : nonEmptyCoins(ctx.actor.system.currency);
   const hasTable = Boolean((ctx.corpse.baseActor ?? ctx.actor).getFlag(MODULE_ID, "table"));
   const harvest = hide || ctx.pick ? [] : harvestViews(ctx);
+  const canTakeCoins = mayTakeCoins(ctx);
   return {
     harvest,
     hasHarvest: harvest.length > 0,
@@ -297,6 +316,8 @@ function buildState(ctx) {
     requireRelease: ctx.requireRelease,
     locked: ctx.locked && !ctx.pick,
     canTake: ctx.canTake,
+    canTakeCoins,
+    canTakeAny: items.some((i) => i.canTake) || (coins.length > 0 && canTakeCoins),
     looterName: ctx.looter?.name ?? "",
     group: group ? { name: group.name } : null,
     items,
@@ -307,19 +328,24 @@ function buildState(ctx) {
       ? {
           open: ctx.pick.status === "open",
           failed: ctx.pick.status === "failed",
-          waiting: ctx.pick.status === "success" && !ctx.pick.granted
+          waiting: ctx.pick.status === "success" && !pickpocketHasGrant(ctx.pick)
         }
       : null,
-    pickGM: ctx.isGM && ctx.alive ? pickGMView(ctx) : null
+    pickGM: ctx.isGM && ctx.alive ? pickGMView(ctx, successThieves) : null
   };
 }
 
-const destination = (ctx, to) => (to === "group" ? partyFor(ctx.looter?.actor) : ctx.looter?.actor);
+/** Beim Taschendiebstahl darf nur genommen werden, was die Spielleitung freigegeben hat. */
+const mayTakeItem = (ctx, item) => ctx.canTake && (!ctx.pick || ctx.pick.all || ctx.pick.items.has(item.id));
+const mayTakeCoins = (ctx) => ctx.canTake && (!ctx.pick || ctx.pick.all || ctx.pick.coins);
+
+const destination = (ctx, to) => ctx.pick ? ctx.looter?.actor : (to === "group" ? partyFor(ctx.looter?.actor) : ctx.looter?.actor);
 
 async function takeItem(ctx, p) {
   if (!ctx.canTake) return fail(ctx.locked ? "CLOOT.Err.Locked" : "CLOOT.Err.NoLooter");
   const item = ctx.actor.items.get(p.itemId);
   if (!item || !isLootableItem(item)) return fail("CLOOT.Err.ItemGone");
+  if (!mayTakeItem(ctx, item)) return fail("CLOOT.Err.Locked");
   const dest = destination(ctx, p.to);
   if (!dest) return fail("CLOOT.Err.NoGroup");
 
@@ -340,6 +366,7 @@ async function takeItem(ctx, p) {
 
 async function takeCoins(ctx, p) {
   if (!ctx.canTake) return fail(ctx.locked ? "CLOOT.Err.Locked" : "CLOOT.Err.NoLooter");
+  if (!mayTakeCoins(ctx)) return fail("CLOOT.Err.Locked");
   const dest = destination(ctx, p.to);
   if (!dest) return fail("CLOOT.Err.NoGroup");
   const coins = await moveCoins(ctx.actor, dest);
@@ -355,7 +382,7 @@ async function takeAll(ctx, p) {
   if (!dest) return fail("CLOOT.Err.NoGroup");
 
   const taken = [];
-  for (const item of ctx.actor.items.filter(isLootableItem)) {
+  for (const item of ctx.actor.items.filter((i) => isLootableItem(i) && mayTakeItem(ctx, i))) {
     const max = item.type === "container" ? 1 : Number(item.system.quantity ?? 1) || 1;
     const name = displayName(item, ctx.isGM);
     try {
@@ -367,8 +394,8 @@ async function takeAll(ctx, p) {
     }
     taken.push({ name, qty: max });
   }
-  const coins = await moveCoins(ctx.actor, dest);
-  if (!taken.length && !coins.length) return fail("CLOOT.Err.Empty");
+  const coins = mayTakeCoins(ctx) ? await moveCoins(ctx.actor, dest) : [];
+  if (!taken.length && !coins.length) return fail(ctx.pick ? "CLOOT.Err.Locked" : "CLOOT.Err.Empty");
   await announce(ctx, p.to, taken, coins);
   changed(ctx.corpse.uuid);
   return { ok: true, state: buildState(ctx) };
@@ -463,10 +490,13 @@ async function announce(ctx, to, items, coins) {
     from: escapeHtml(ctx.corpse.name),
     group: escapeHtml(group?.name ?? "")
   });
-  await ChatMessage.create({
+  const message = {
     content: `<div class="corpse-loot-chat"><p>${text}</p></div>`,
     speaker: { alias: ctx.looter?.name ?? ctx.user.name }
-  });
+  };
+  // Beim Taschendiebstahl bleibt der Diebstahl unter Spielleitung und Dieb
+  if (ctx.pick) message.whisper = [...new Set([...game.users.filter((u) => u.isGM).map((u) => u.id), ctx.user.id])];
+  await ChatMessage.create(message);
 }
 
 /* -------------------------------------------- */
@@ -724,7 +754,7 @@ async function announceHarvest(ctx, entry, success, got, used = null) {
 const passivePerception = (actor) => Number(actor?.system?.skills?.prc?.passive) || 10;
 
 /** Ansicht für die Spielleitung: Einstellungen und alle Diebe mit Status. */
-function pickGMView(ctx) {
+function pickGMView(ctx, successThieves = []) {
   const cfg = ctx.corpse.getFlag(MODULE_ID, "pick") ?? {};
   const passive = passivePerception(ctx.actor);
   const thieves = Object.entries(cfg.thieves ?? {}).map(([id, v]) => ({
@@ -741,7 +771,9 @@ function pickGMView(ctx) {
     customDc: cfg.dc ?? "",
     passive,
     thieves,
-    hasThieves: thieves.length > 0
+    hasThieves: thieves.length > 0,
+    hasSuccess: successThieves.length > 0,
+    coinGrants: successThieves.map((th) => ({ actorId: th.actorId, name: th.name, short: th.short, on: th.all || th.coins }))
   };
 }
 
@@ -760,7 +792,7 @@ async function pickResolve(ctx, p) {
   if (!isValidTotal(p.total)) return fail("CLOOT.Err.Internal");
   const dc = pickpocketDc(ctx.pick.cfg, passivePerception(ctx.actor));
   const success = pickpocketSucceeded(dc, p.total);
-  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.${ctx.pick.id}`]: { status: success ? "success" : "failed", granted: false } });
+  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.${ctx.pick.id}`]: { status: success ? "success" : "failed", granted: false, items: [], coins: false } });
   const gms = game.users.filter((u) => u.isGM).map((u) => u.id);
   if (success) {
     await ChatMessage.create({
@@ -809,6 +841,30 @@ async function pickGrant(ctx, p) {
       })}</p></div>`
     });
   }
+  changed(ctx.corpse.uuid);
+  return { ok: true, state: buildState(ctx) };
+}
+
+/** Spielleitung: einen einzelnen Gegenstand für einen erfolgreichen Dieb freigeben oder wieder sperren. */
+async function pickItem(ctx, p) {
+  if (!ctx.isGM) return fail("CLOOT.Err.GMOnly");
+  const cur = (ctx.corpse.getFlag(MODULE_ID, "pick") ?? {}).thieves?.[p.actorId];
+  if (cur?.status !== "success") return fail("CLOOT.Err.Internal");
+  if (!ctx.actor.items.has(p.itemId)) return fail("CLOOT.Err.ItemGone");
+  const list = new Set(Array.isArray(cur.items) ? cur.items : []);
+  if (list.has(p.itemId)) list.delete(p.itemId);
+  else list.add(p.itemId);
+  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.${p.actorId}.items`]: [...list] });
+  changed(ctx.corpse.uuid);
+  return { ok: true, state: buildState(ctx) };
+}
+
+/** Spielleitung: Münzen für einen erfolgreichen Dieb freigeben oder wieder sperren. */
+async function pickCoins(ctx, p) {
+  if (!ctx.isGM) return fail("CLOOT.Err.GMOnly");
+  const cur = (ctx.corpse.getFlag(MODULE_ID, "pick") ?? {}).thieves?.[p.actorId];
+  if (cur?.status !== "success") return fail("CLOOT.Err.Internal");
+  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.${p.actorId}.coins`]: !cur.coins });
   changed(ctx.corpse.uuid);
   return { ok: true, state: buildState(ctx) };
 }

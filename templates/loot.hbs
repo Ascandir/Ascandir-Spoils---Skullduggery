@@ -80,10 +80,16 @@
         {{#each coinList}}
         <div class="bag-coin"><img src="{{../assets}}/coin-{{key}}.svg" alt=""><span><strong>{{value}}</strong> {{label}}</span></div>
         {{/each}}
-        {{#if state.canTake}}
+        {{#if state.canTakeCoins}}
         <div class="bag-coin-actions">
           <button type="button" class="bag-btn" data-action="coins" data-to="self"><i class="fa-solid fa-hand"></i> {{localize "CLOOT.Take"}}</button>
           {{#if state.group}}<button type="button" class="bag-btn" data-action="coins" data-to="group" data-tooltip="{{state.group.name}}"><i class="fa-solid fa-people-group"></i> {{localize "CLOOT.ToGroup"}}</button>{{/if}}
+        </div>
+        {{/if}}
+        {{#if state.pickGM.hasSuccess}}
+        <div class="bag-chips" data-tooltip="CLOOT.Pick.CoinsFor">
+          <i class="fa-solid fa-coins"></i>
+          {{#each state.pickGM.coinGrants}}<button type="button" class="bag-chip {{#if on}}on{{/if}}" data-action="pickCoins" data-actor="{{actorId}}" data-tooltip="{{name}}">{{short}}</button>{{/each}}
         </div>
         {{/if}}
       </div>
@@ -125,6 +131,8 @@
               <button type="button" class="bag-ibtn" data-action="take" data-to="self" data-tooltip="CLOOT.Take"><i class="fa-solid fa-hand"></i></button>
               {{#if canGroup}}<button type="button" class="bag-ibtn" data-action="take" data-to="group" data-tooltip="CLOOT.ToGroup"><i class="fa-solid fa-people-group"></i></button>{{/if}}
             {{/if}}
+            {{#unless canTake}}{{#if ../state.pick}}<i class="fa-solid fa-lock bag-lock" data-tooltip="CLOOT.Pick.ItemLocked"></i>{{/if}}{{/unless}}
+            {{#if grants.length}}<span class="bag-chips" data-tooltip="CLOOT.Pick.ItemFor">{{#each grants}}<button type="button" class="bag-chip {{#if on}}on{{/if}}" data-action="pickItem" data-actor="{{actorId}}" data-tooltip="{{name}}">{{short}}</button>{{/each}}</span>{{/if}}
             {{#if canManage}}<button type="button" class="bag-ibtn bag-danger" data-action="gmRemove" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-trash"></i></button>{{/if}}
           </span>
         </li>
@@ -137,12 +145,12 @@
       </ul>
 
       {{#if state.canTake}}
-      {{#unless state.isEmpty}}
+      {{#if state.canTakeAny}}
       <div class="bag-foot">
         <button type="button" class="bag-big" data-action="all" data-to="self"><i class="fa-solid fa-hand"></i> <span>{{localize "CLOOT.TakeAll"}}</span></button>
         {{#if state.group}}<button type="button" class="bag-big" data-action="all" data-to="group"><i class="fa-solid fa-people-group"></i> <span>{{localize "CLOOT.AllToGroup"}}</span></button>{{/if}}
       </div>
-      {{/unless}}
+      {{/if}}
       {{else if state.isGM}}
       <p class="bag-hint">{{localize "CLOOT.GMHint"}}</p>
       {{/if}}
