@@ -151,15 +151,17 @@ function applyAccent() {
 /** Auf dem Spieler-PC prüfen wir nur grob. Die endgültige Prüfung macht immer die Spielleitung. */
 const isDeadClient = (td) => Boolean(td?.hasStatusEffect?.("dead") || td?.actor?.statuses?.has("dead"));
 
-/** Lebender NSC, den dieser Spieler bestehlen dürfte (die endgültige Prüfung macht die Spielleitung). */
-const isPickableClient = (td) =>
-  Boolean(
-    !game.user.isGM &&
-      td?.actor?.type === "npc" &&
-      !isDeadClient(td) &&
-      !td.actor.isOwner &&
-      pickpocketAllowed(td.getFlag(MODULE_ID, "pick"), game.settings.get(MODULE_ID, "pickpocket"))
-  );
+/**
+ * Lebender NSC, den dieser Spieler bestehlen dürfte. Spieler kennen fremde NSC oft gar nicht als Actor
+ * (keine Berechtigung), deshalb darf der Actor hier fehlen. Die endgültige Prüfung macht die Spielleitung.
+ */
+const isPickableClient = (td) => {
+  if (game.user.isGM || !td || td.isOwner) return false;
+  const type = td.actor?.type;
+  if (type && type !== "npc") return false;
+  if (isDeadClient(td)) return false;
+  return pickpocketAllowed(td.getFlag(MODULE_ID, "pick"), game.settings.get(MODULE_ID, "pickpocket"));
+};
 
 const rectOf = (td) => {
   const size = td.parent.grid.size;

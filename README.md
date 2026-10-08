@@ -1,4 +1,4 @@
-# Corpse Loot (Beute plündern) v0.15.0
+# Corpse Loot (Beute plündern) v0.15.1
 
 Tote NSCs (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
