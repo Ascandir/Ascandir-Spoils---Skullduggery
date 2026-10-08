@@ -1,12 +1,15 @@
 <div class="cl-bag cl-lockwin {{#if bagOn}}cl-lock-on{{/if}}">
   {{#if bagOn}}
   <img class="cl-shackle" src="{{assets}}/lock/shackle.webp" alt="">
-  <div class="cl-plate"><i class="cl-rivet r1"></i><i class="cl-rivet r2"></i><i class="cl-rivet r3"></i><i class="cl-rivet r4"></i></div>
-  <img class="cl-keyhole" src="{{assets}}/lock/keyhole.webp" alt="">
+  <div class="cl-plate" style="background-image: url('{{assets}}/lock/iron.webp')">
+    <i class="cl-corner c1"></i><i class="cl-corner c2"></i><i class="cl-corner c3"></i><i class="cl-corner c4"></i>
+    <i class="cl-strap top"></i><i class="cl-strap bot"></i>
+  </div>
+  <img class="cl-escutcheon" src="{{assets}}/lock/escutcheon.webp" alt="">
   <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
   {{/if}}
 
-  <section class="corpse-loot-body bag-panel cl-lockpanel">
+  <section class="corpse-loot-body bag-panel cl-lockpanel" {{#if bagOn}}style="background-image: linear-gradient(180deg, rgba(6,6,9,.55), rgba(10,10,14,.7)), url('{{assets}}/lock/iron.webp')"{{/if}}>
   {{#if gone}}
     <p class="bag-notice">{{localize "CLOOT.Err.NoDoor"}}</p>
   {{else}}

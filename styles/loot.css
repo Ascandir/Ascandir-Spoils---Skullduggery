@@ -413,20 +413,29 @@
 .cl-thievery button:hover { color: #fff; border-color: #f0c878; box-shadow: 0 0 8px rgba(240, 200, 120, 0.45); }
 .cl-thievery .form-footer { margin-top: 0.8rem; display: flex; justify-content: flex-end; }
 
-/* ---------- Schloss-Fenster ---------- */
-.cl-lockwin { position: relative; padding: 118px 10px 10px; }
+/* ---------- Schloss-Fenster (geschmiedetes Eisen, mittelalterlich) ---------- */
+.cl-lockwin { position: relative; padding: 112px 12px 12px; }
 .cl-lockwin .cl-shackle { position: absolute; z-index: 0; left: 50%; top: 0; width: 330px; height: auto; transform: translateX(-50%); pointer-events: none; filter: drop-shadow(0 6px 6px rgba(0,0,0,.6)); }
-.cl-lockwin .cl-plate { position: absolute; z-index: 1; inset: 100px 0 0 0; border-radius: 22px; border: 3px solid #1c1f26;
-  background: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, rgba(0,0,0,.05) 1px 3px), linear-gradient(145deg, #7b828f 0%, #4a505b 38%, #343942 62%, #5a616d 100%);
-  box-shadow: inset 0 0 0 5px #8a6a2a, inset 0 0 0 7px #3b2a0c, inset 0 3px 10px rgba(255,255,255,.25), inset 0 -8px 16px rgba(0,0,0,.5), 0 14px 26px rgba(0,0,0,.65); }
-.cl-lockwin .cl-rivet { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f3dc9a, #b98a2e 55%, #5a3d0c); box-shadow: 0 2px 3px rgba(0,0,0,.7), inset 0 0 2px rgba(0,0,0,.5); }
-.cl-lockwin .r1 { left: 18px; top: 18px; } .cl-lockwin .r2 { right: 18px; top: 18px; } .cl-lockwin .r3 { left: 18px; bottom: 18px; } .cl-lockwin .r4 { right: 18px; bottom: 18px; }
-.cl-lockwin .cl-keyhole { position: absolute; z-index: 3; left: 50%; top: 58px; width: 92px; height: 92px; transform: translateX(-50%); filter: drop-shadow(0 4px 4px rgba(0,0,0,.7)); pointer-events: none; }
-.cl-lockwin .cl-bag-close { z-index: 6; right: 26px; top: 118px; width: 56px; height: 56px; }
-.cl-lockwin .cl-lockpanel { position: relative; z-index: 2; margin: 0 22px 22px; padding: 70px 1.1rem 1rem; border-radius: 12px; background: linear-gradient(180deg, rgba(8,9,12,.72), rgba(16,18,24,.82)); box-shadow: inset 0 3px 12px #000, 0 1px 0 rgba(255,255,255,.15); border: 1px solid #14161b; }
-.cl-lockwin .bag-head { text-align: center; }
-.cl-lockwin .bag-title h2 { color: #ecd9a0; }
-
+.cl-lockwin .cl-plate { position: absolute; z-index: 1; inset: 96px 0 0 0; border-radius: 10px; background-size: 380px; border: 3px solid #0d0e11;
+  box-shadow: inset 0 0 0 2px #5d6572, inset 0 0 0 5px #15171b, inset 0 3px 8px rgba(255,255,255,.18), inset 0 -10px 20px rgba(0,0,0,.6), 0 14px 26px rgba(0,0,0,.7); }
+.cl-lockwin .cl-strap { position: absolute; left: 0; right: 0; height: 26px; background: linear-gradient(180deg, #6b7380, #3b414b 45%, #23262d); border-top: 1px solid #8c94a1; border-bottom: 2px solid #0b0c0f; box-shadow: 0 3px 5px rgba(0,0,0,.6);
+  background-image: radial-gradient(circle at 50% 50%, #d9b45e 0 3px, #7a5a1c 4px, transparent 5px), linear-gradient(180deg, #6b7380, #3b414b 45%, #23262d); background-size: 34px 26px, auto; background-repeat: repeat-x, no-repeat; }
+.cl-lockwin .cl-strap.top { top: 14px; } .cl-lockwin .cl-strap.bot { bottom: 14px; }
+.cl-lockwin .cl-corner { position: absolute; z-index: 2; width: 54px; height: 54px; background: radial-gradient(circle at 50% 50%, #e8c46a 0 5px, #7a5a1c 6px 7px, transparent 8px); }
+.cl-lockwin .cl-corner::before { content: ""; position: absolute; width: 100%; height: 100%; border: 0 solid #2c3038; box-sizing: border-box; filter: drop-shadow(0 2px 2px rgba(0,0,0,.7)); }
+.cl-lockwin .c1 { left: -4px; top: -4px; } .cl-lockwin .c1::before { border-width: 9px 0 0 9px; border-top-left-radius: 12px; border-color: #4c525d; }
+.cl-lockwin .c2 { right: -4px; top: -4px; } .cl-lockwin .c2::before { border-width: 9px 9px 0 0; border-top-right-radius: 12px; border-color: #4c525d; }
+.cl-lockwin .c3 { left: -4px; bottom: -4px; } .cl-lockwin .c3::before { border-width: 0 0 9px 9px; border-bottom-left-radius: 12px; border-color: #4c525d; }
+.cl-lockwin .c4 { right: -4px; bottom: -4px; } .cl-lockwin .c4::before { border-width: 0 9px 9px 0; border-bottom-right-radius: 12px; border-color: #4c525d; }
+.cl-lockwin .cl-escutcheon { position: absolute; z-index: 4; left: 50%; top: 52px; width: 112px; height: auto; transform: translateX(-50%); filter: drop-shadow(0 5px 5px rgba(0,0,0,.75)); pointer-events: none; }
+.cl-lockwin .cl-bag-close { z-index: 6; right: 30px; top: 132px; width: 52px; height: 52px; }
+.cl-lockwin .cl-lockpanel { position: relative; z-index: 2; margin: 34px 26px 44px; padding: 56px 1.1rem 1rem; border-radius: 4px; background-size: 380px; border: 2px solid #0b0c0f;
+  box-shadow: inset 0 0 0 1px #7a5a1c, inset 0 3px 14px #000, 0 0 0 2px #444a55, 0 2px 0 3px #14161a; }
+.cl-lockwin .bag-head { text-align: center; justify-content: center; }
+.cl-lockwin .bag-title { text-align: center; width: 100%; }
+.cl-lockwin .bag-title h2 { color: #ecd9a0; letter-spacing: 0.08em; }
+.cl-lockwin .bag-rows { background: rgba(0,0,0,.35); border-color: #5a4a22; }
+.cl-lockwin .bag-notice { color: #d8c79a; }
 /* ---------- Ascandir-Menü und Thievery-Fenster: Feinschliff ---------- */
 .application.cl-dialog .window-header { min-height: 2.4rem; align-items: center; gap: 0.5rem; padding: 0 0.6rem; }
 .application.cl-dialog .window-header > i, .application.cl-dialog .window-header .window-icon { color: #e1b963; font-size: 1rem; margin: 0; }
