@@ -8,7 +8,7 @@ class ContainerData extends foundry.abstract.TypeDataModel {
     const f = foundry.data.fields;
     const coin = () => new f.NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 0 });
     return {
-      style: new f.StringField({ required: true, blank: false, choices: ["chest", "sack"], initial: "chest" }),
+      style: new f.StringField({ required: true, blank: false, choices: ["chest", "sack", "resource"], initial: "chest" }),
       description: new f.HTMLField({ required: false, blank: true }),
       currency: new f.SchemaField(Object.fromEntries(COINS.map((k) => [k, coin()])))
     };
@@ -74,7 +74,8 @@ function makeSheet(ActorSheetV2, HandlebarsApplicationMixin) {
         hasItems: items.length > 0,
         styles: [
           { value: "chest", label: t("CLOOT.Container.StyleChest"), selected: (actor.system.style ?? "chest") === "chest" },
-          { value: "sack", label: t("CLOOT.Container.StyleSack"), selected: actor.system.style === "sack" }
+          { value: "sack", label: t("CLOOT.Container.StyleSack"), selected: actor.system.style === "sack" },
+          { value: "resource", label: t("CLOOT.Container.StyleResource"), selected: actor.system.style === "resource" }
         ],
         hasTable: Boolean(actor.getFlag(MODULE_ID, "table"))
       };

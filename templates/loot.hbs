@@ -1,7 +1,7 @@
-<div class="cl-bag {{#if bagOn}}cl-bag-on{{/if}} {{#if isChest}}cl-chest{{/if}}">
+<div class="cl-bag {{#if bagOn}}cl-bag-on{{/if}} {{#if isChest}}cl-chest{{/if}} {{#if isStone}}cl-stone{{/if}}">
   {{#if isChest}}
-  <div class="cl-bag-art" style="border-image-source: url('{{assets}}/chest/body.webp')"></div>
-  <img class="cl-sprite" src="{{assets}}/chest/shield.webp" alt="">
+  <div class="cl-bag-art" style="border-image-source: url('{{assets}}/{{#if isStone}}stone{{else}}chest{{/if}}/body.webp')"></div>
+  {{#unless isStone}}<img class="cl-sprite" src="{{assets}}/chest/shield.webp" alt="">{{/unless}}
   <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
   {{else if bagOn}}
   <div class="cl-bag-art" style="border-image-source: url('{{assets}}/bag/body.webp')"></div>
@@ -9,7 +9,7 @@
   <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
   {{/if}}
 
-  <section class="corpse-loot-body bag-panel" {{#if isChest}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.62)), url('{{assets}}/chest/wood.webp')"{{else if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
+  <section class="corpse-loot-body bag-panel" {{#if isChest}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.62)), url('{{assets}}/{{#if isStone}}stone/dark{{else}}chest/wood{{/if}}.webp')"{{else if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
   {{#if error}}
     <p class="bag-notice">{{error}}</p>
     <div class="bag-foot"><button type="button" class="bag-btn" data-action="refresh"><i class="fa-solid fa-rotate"></i> {{localize "CLOOT.Refresh"}}</button></div>

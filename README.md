@@ -1,4 +1,4 @@
-# Ascandir – Spoils & Skullduggery v0.21.2
+# Ascandir – Spoils & Skullduggery v0.22.0
 
 Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
@@ -171,7 +171,9 @@ Beim Anlegen eines Actors gibt es den neuen Typ **Container**. Er hat einen eige
 - **Schloss** (Spielleitung, unter den drei Punkten → Ascandir, im Token-HUD oder im Bogen): zugesperrt ja/nein, SG zum Knacken, Versuche pro Charakter, Diebeswerkzeug nötig, Schlüssel (Gegenstand hineinziehen oder Namen eintippen).
 - Spieler öffnen den Container wie eine Leiche (Doppelklick, Taste L). Ist er zugesperrt, erscheint das Eisenschloss-Fenster mit Schlüssel und Schloss knacken. Erst danach sieht man den Inhalt.
 
-Im Container-Bogen wählst du das **Aussehen**: *Truhe* (Holz mit Eisenbeschlägen und Messingschild) oder *Sack* (Lederbeutel). Das Schloss-Fenster ist ein Vorhängeschloss in Holz und Eisen und gilt für Türen und Container. Der Chat nennt bei Containern den Namen des Tokens statt "Tür".
+Im Container-Bogen wählst du das **Typ**: *Truhe* (Holz mit Eisenbeschlägen und Messingschild) oder *Sack* (Lederbeutel). Das Schloss-Fenster ist ein Vorhängeschloss in Holz und Eisen und gilt für Türen und Container. Der Chat nennt bei Containern den Namen des Tokens statt "Tür".
+
+Dritter Typ: **Ressource** (Steinrahmen). Nach jeder erfolgreichen Ernte wird die Ernte-Stufe zurückgesetzt und die Loottable neu gewürfelt, der Container ist also sofort wieder erntbar. Der Ertrag der Ernte landet im Container und bleibt dort, bis er genommen wird. Gedacht für eigene Crafting-Systeme (Erzadern, Kräuterbeete usw.).
 
 ## Ernte: Versuche
 In der Ernte-Stufe steht jetzt ein Feld **Versuche** statt "Nur ein Versuch": Wie oft jeder Charakter die Ernte versuchen darf. Gezählt wird der Wurf. Leer = unbegrenzt, ältere Einträge bleiben bei einem Versuch. Im Ascandir-Menü gibt es dafür den Knopf **Ernte**, auch bei Containern (z. B. für Rohstoffe).

@@ -715,6 +715,7 @@ async function harvestResolve(ctx, p) {
   const got = success ? await grantHarvest(ctx.actor, entry) : [];
   const used = toolIsConsumed(entry, success) ? await consumeTool(ctx.looter.actor, entry) : null;
   await announceHarvest(ctx, entry, success, got, used);
+  if (success) await regrowResource(ctx, entry);
   changed(ctx.corpse.uuid);
   return { ok: true, success, state: buildState(ctx) };
 }
@@ -729,8 +730,20 @@ async function harvestUnlock(ctx, p) {
   state[entry.id] = { done: true, failed: [], counts: {} };
   await ctx.corpse.setFlag(MODULE_ID, "harvest", state);
   await grantHarvest(ctx.actor, entry);
+  await regrowResource(ctx, entry);
   changed(ctx.corpse.uuid);
   return { ok: true, state: buildState(ctx) };
+}
+
+/** Ressourcen-Container: nach jeder erfolgreichen Ernte wieder erntbar und neu gewürfelt. */
+async function regrowResource(ctx, entry) {
+  if (ctx.actor?.system?.style !== "resource") return;
+  try {
+    await ctx.corpse.update({ [`flags.${MODULE_ID}.harvest.-=${entry.id}`]: null });
+    await rollLoot(ctx.corpse, { force: true, quiet: true });
+  } catch (e) {
+    console.warn(`${MODULE_ID} | regrow`, e);
+  }
 }
 
 /** Würfelt den Ertrag einer Stufe und legt ihn in die Beute der Leiche. */
