@@ -20,7 +20,16 @@ import {
   toolIsConsumed,
   harvestStatus,
   harvestSucceeded,
-  isValidTotal
+  isValidTotal,
+  pickpocketDc,
+  pickpocketSucceeded,
+  pickpocketStatus,
+  pickpocketGranted,
+  pickpocketAllowed,
+  normalizeLock,
+  lockHasOptions,
+  findThievesTools,
+  findKey
 } from "./rules.mjs";
 
 const t = (key, data) => (data ? game.i18n.format(key, data) : game.i18n.localize(key));
@@ -173,9 +182,11 @@ function resolve(user, p) {
   if (!corpse?.actor) return fail("CLOOT.Err.NoCorpse");
 
   const isGM = user.isGM;
-  // Die Spielleitung darf auch lebende NSC öffnen (z. B. um einem Token vorab einen Gegenstand zu geben).
+  // Lebende NSC: Die Spielleitung darf sie öffnen (z. B. um etwas vorab zu geben), Spieler nur per Taschendiebstahl.
   const alive = !isCorpse(corpse);
-  if (alive && (!isGM || corpse.actor.type !== "npc")) return fail("CLOOT.Err.NotDead");
+  if (alive && corpse.actor.type !== "npc") return fail("CLOOT.Err.NotDead");
+  const pickCfg = corpse.getFlag(MODULE_ID, "pick") ?? {};
+  if (alive && !isGM && !pickpocketAllowed(pickCfg, game.settings.get(MODULE_ID, "pickpocket"))) return fail("CLOOT.Err.NotDead");
   const looter = p.looterUuid ? fromUuidSync(p.looterUuid) : null;
   let canTake = false;
 
@@ -193,9 +204,21 @@ function resolve(user, p) {
 
   const requireRelease = !game.settings.get(MODULE_ID, "autoRelease");
   const released = Boolean(corpse.getFlag(MODULE_ID, "released"));
-  const locked = !isGM && requireRelease && !released;
+  let locked = !isGM && requireRelease && !released;
+  let hidden = locked;
 
-  return { ok: true, user, isGM, alive, corpse, actor: corpse.actor, looter, canTake: canTake && !locked, locked, released, requireRelease };
+  // Taschendiebstahl: erst Probe, bei Erfolg sieht man alles, nehmen darf man erst nach Freigabe der Spielleitung
+  let pick = null;
+  if (alive && !isGM) {
+    if (corpse.actor.testUserPermission(user, "OWNER") || looter.id === corpse.id) return fail("CLOOT.Err.NotDead");
+    const thieves = pickCfg.thieves ?? {};
+    const id = looter.actor.id;
+    pick = { cfg: pickCfg, id, status: pickpocketStatus(thieves, id), granted: pickpocketGranted(thieves, id) };
+    hidden = pick.status !== "success";
+    locked = !pick.granted;
+  }
+
+  return { ok: true, user, isGM, alive, corpse, actor: corpse.actor, looter, canTake: canTake && !locked, locked, hidden, pick, released, requireRelease };
 }
 
 /* -------------------------------------------- */
@@ -203,6 +226,7 @@ function resolve(user, p) {
 /* -------------------------------------------- */
 
 export async function gmHandle(user, op, p) {
+  if (op.startsWith("door")) return doorHandle(user, op, p);
   const ctx = resolve(user, p);
   if (!ctx.ok) return ctx;
   switch (op) {
@@ -228,6 +252,16 @@ export async function gmHandle(user, op, p) {
       return harvestResolve(ctx, p);
     case "harvestUnlock":
       return harvestUnlock(ctx, p);
+    case "pickCheck":
+      return pickCheck(ctx);
+    case "pickResolve":
+      return pickResolve(ctx, p);
+    case "pickSet":
+      return pickSet(ctx, p);
+    case "pickGrant":
+      return pickGrant(ctx, p);
+    case "pickReset":
+      return pickReset(ctx, p);
     default:
       return fail("CLOOT.Err.Internal");
   }
@@ -235,14 +269,15 @@ export async function gmHandle(user, op, p) {
 
 function buildState(ctx) {
   const group = ctx.looter ? partyFor(ctx.looter.actor) : null;
-  const items = ctx.locked
+  const hide = ctx.hidden ?? ctx.locked;
+  const items = hide
     ? []
     : ctx.actor.items
         .filter(isLootableItem)
         .map((i) => ({ ...buildItemView(i, { isGM: ctx.isGM }), canTake: ctx.canTake, canGroup: ctx.canTake && Boolean(group), canManage: ctx.isGM }));
-  const coins = ctx.locked ? [] : nonEmptyCoins(ctx.actor.system.currency);
+  const coins = hide ? [] : nonEmptyCoins(ctx.actor.system.currency);
   const hasTable = Boolean((ctx.corpse.baseActor ?? ctx.actor).getFlag(MODULE_ID, "table"));
-  const harvest = ctx.locked ? [] : harvestViews(ctx);
+  const harvest = hide || ctx.pick ? [] : harvestViews(ctx);
   return {
     harvest,
     hasHarvest: harvest.length > 0,
@@ -257,14 +292,22 @@ function buildState(ctx) {
     isGM: ctx.isGM,
     released: ctx.released,
     requireRelease: ctx.requireRelease,
-    locked: ctx.locked,
+    locked: ctx.locked && !ctx.pick,
     canTake: ctx.canTake,
     looterName: ctx.looter?.name ?? "",
     group: group ? { name: group.name } : null,
     items,
     coins,
     hasCoins: coins.length > 0,
-    isEmpty: items.length === 0 && coins.length === 0 && harvest.length === 0
+    isEmpty: items.length === 0 && coins.length === 0 && harvest.length === 0,
+    pick: ctx.pick
+      ? {
+          open: ctx.pick.status === "open",
+          failed: ctx.pick.status === "failed",
+          waiting: ctx.pick.status === "success" && !ctx.pick.granted
+        }
+      : null,
+    pickGM: ctx.isGM && ctx.alive ? pickGMView(ctx) : null
   };
 }
 
@@ -669,4 +712,166 @@ async function announceHarvest(ctx, entry, success, got, used = null) {
     })}</p>${usedLine}</div>`,
     speaker: { alias: ctx.looter.name }
   });
+}
+
+/* -------------------------------------------- */
+/*  Taschendiebstahl (lebende NSC)               */
+/* -------------------------------------------- */
+
+const passivePerception = (actor) => Number(actor?.system?.skills?.prc?.passive) || 10;
+
+/** Ansicht für die Spielleitung: Einstellungen und alle Diebe mit Status. */
+function pickGMView(ctx) {
+  const cfg = ctx.corpse.getFlag(MODULE_ID, "pick") ?? {};
+  const passive = passivePerception(ctx.actor);
+  const thieves = Object.entries(cfg.thieves ?? {}).map(([id, v]) => ({
+    id,
+    name: game.actors.get(id)?.name ?? "?",
+    isSuccess: v?.status === "success",
+    isFailed: v?.status === "failed",
+    granted: Boolean(v?.granted)
+  }));
+  return {
+    enabled: pickpocketAllowed(cfg, game.settings.get(MODULE_ID, "pickpocket")),
+    dc: pickpocketDc(cfg, passive),
+    custom: Boolean(cfg.dc),
+    customDc: cfg.dc ?? "",
+    passive,
+    thieves,
+    hasThieves: thieves.length > 0
+  };
+}
+
+/** Schritt 1: darf der Spieler es versuchen? */
+async function pickCheck(ctx) {
+  if (!ctx.pick) return fail("CLOOT.Err.Internal");
+  if (ctx.pick.status === "success") return fail("CLOOT.Err.PickDone");
+  if (ctx.pick.status === "failed") return fail("CLOOT.Err.PickFailed");
+  return { ok: true, skill: "slt" };
+}
+
+/** Schritt 2: Der Spieler hat Fingerfertigkeit gewürfelt, die Spielleitung wertet gegen den SG aus. */
+async function pickResolve(ctx, p) {
+  const gate = await pickCheck(ctx);
+  if (!gate.ok) return gate;
+  if (!isValidTotal(p.total)) return fail("CLOOT.Err.Internal");
+  const dc = pickpocketDc(ctx.pick.cfg, passivePerception(ctx.actor));
+  const success = pickpocketSucceeded(dc, p.total);
+  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.${ctx.pick.id}`]: { status: success ? "success" : "failed", granted: false } });
+  const gms = game.users.filter((u) => u.isGM).map((u) => u.id);
+  if (success) {
+    await ChatMessage.create({
+      content: `<div class="corpse-loot-chat"><p>${t("CLOOT.Chat.PickOkGM", {
+        who: escapeHtml(ctx.looter.name),
+        target: escapeHtml(ctx.corpse.name),
+        total: Number(p.total),
+        dc
+      })}</p></div>`,
+      whisper: gms
+    });
+  } else {
+    await ChatMessage.create({
+      content: `<div class="corpse-loot-chat"><p>${t("CLOOT.Chat.PickFail", { who: escapeHtml(ctx.looter.name), target: escapeHtml(ctx.corpse.name) })}</p></div>`,
+      speaker: { alias: ctx.looter.name }
+    });
+  }
+  changed(ctx.corpse.uuid);
+  return { ok: true, success, state: buildState(ctx) };
+}
+
+/** Spielleitung: Taschendiebstahl an/aus und eigener SG (leer = passive Wahrnehmung). */
+async function pickSet(ctx, p) {
+  if (!ctx.isGM) return fail("CLOOT.Err.GMOnly");
+  const dc = Math.floor(Number(p.dc));
+  await ctx.corpse.update({
+    [`flags.${MODULE_ID}.pick.enabled`]: Boolean(p.enabled),
+    [`flags.${MODULE_ID}.pick.dc`]: Number.isFinite(dc) && dc > 0 ? dc : null
+  });
+  changed(ctx.corpse.uuid);
+  return { ok: true, state: buildState(ctx) };
+}
+
+/** Spielleitung: Beute für einen erfolgreichen Dieb freigeben oder wieder sperren. */
+async function pickGrant(ctx, p) {
+  if (!ctx.isGM) return fail("CLOOT.Err.GMOnly");
+  const cur = (ctx.corpse.getFlag(MODULE_ID, "pick") ?? {}).thieves?.[p.actorId];
+  if (cur?.status !== "success") return fail("CLOOT.Err.Internal");
+  const now = !cur.granted;
+  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.${p.actorId}.granted`]: now });
+  if (now) {
+    await ChatMessage.create({
+      content: `<div class="corpse-loot-chat"><p>${t("CLOOT.Chat.PickGranted", {
+        who: escapeHtml(game.actors.get(p.actorId)?.name ?? "?"),
+        target: escapeHtml(ctx.corpse.name)
+      })}</p></div>`
+    });
+  }
+  changed(ctx.corpse.uuid);
+  return { ok: true, state: buildState(ctx) };
+}
+
+/** Spielleitung: Versuch eines Diebes zurücksetzen (er darf noch einmal würfeln). */
+async function pickReset(ctx, p) {
+  if (!ctx.isGM) return fail("CLOOT.Err.GMOnly");
+  await ctx.corpse.update({ [`flags.${MODULE_ID}.pick.thieves.-=${p.actorId}`]: null });
+  changed(ctx.corpse.uuid);
+  return { ok: true, state: buildState(ctx) };
+}
+
+/* -------------------------------------------- */
+/*  Verschlossene Türen                          */
+/* -------------------------------------------- */
+
+/** Prüfungen für alle Tür-Aktionen. */
+function doorContext(user, p) {
+  const wall = p.wallUuid ? fromUuidSync(p.wallUuid) : null;
+  if (!wall || wall.documentName !== "Wall") return fail("CLOOT.Err.NoDoor");
+  if (wall.ds !== CONST.WALL_DOOR_STATES.LOCKED) return fail("CLOOT.Err.NotLockedDoor");
+  const looter = p.looterUuid ? fromUuidSync(p.looterUuid) : null;
+  if (!looter?.actor) return fail("CLOOT.Err.NoLooter");
+  if (!user.isGM && !looter.actor.testUserPermission(user, "OWNER")) return fail("CLOOT.Err.NotYourToken");
+  if (looter.parent !== wall.parent) return fail("CLOOT.Err.OtherScene");
+  const lock = normalizeLock(wall.getFlag(MODULE_ID, "lock"));
+  if (!lockHasOptions(lock)) return fail("CLOOT.Err.NoLockOptions");
+  return { ok: true, wall, looter, lock, user };
+}
+
+async function unlockDoor(ctx, how) {
+  await ctx.wall.update({ ds: CONST.WALL_DOOR_STATES.CLOSED });
+  await ChatMessage.create({
+    content: `<div class="corpse-loot-chat"><p>${how}</p></div>`,
+    speaker: { alias: ctx.looter.name }
+  });
+}
+
+export async function doorHandle(user, op, p) {
+  const ctx = doorContext(user, p);
+  if (!ctx.ok) return ctx;
+  const items = ctx.looter.actor.items.contents;
+
+  if (op === "doorKey") {
+    const key = findKey(items, ctx.lock);
+    if (!key) return fail("CLOOT.Err.NoKey");
+    await unlockDoor(ctx, t("CLOOT.Chat.DoorKey", { who: escapeHtml(ctx.looter.name), key: escapeHtml(key.name) }));
+    return { ok: true, success: true };
+  }
+
+  // Schloss knacken: doorCheck (darf er?) und doorPick (Wurf auswerten)
+  if (!ctx.lock.dc) return fail("CLOOT.Err.NotPickable");
+  if (ctx.lock.needTool && !findThievesTools(items)) return fail("CLOOT.Err.NeedThievesTools");
+  if (op === "doorCheck") return { ok: true, skill: "slt" };
+  if (op === "doorPick") {
+    if (!isValidTotal(p.total)) return fail("CLOOT.Err.Internal");
+    const success = pickpocketSucceeded(ctx.lock.dc, p.total);
+    if (success) {
+      await unlockDoor(ctx, t("CLOOT.Chat.DoorPickOk", { who: escapeHtml(ctx.looter.name) }));
+    } else {
+      await ChatMessage.create({
+        content: `<div class="corpse-loot-chat"><p>${t("CLOOT.Chat.DoorPickFail", { who: escapeHtml(ctx.looter.name) })}</p></div>`,
+        speaker: { alias: ctx.looter.name }
+      });
+    }
+    return { ok: true, success };
+  }
+  return fail("CLOOT.Err.Internal");
 }

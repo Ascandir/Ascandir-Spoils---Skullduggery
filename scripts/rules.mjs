@@ -247,3 +247,75 @@ const TYPE_ICONS = {
 /** Font-Awesome-Symbol für den Kreaturentyp (die 14 Typen von D&D 5e); unbekannt oder leer = Beutel. */
 export const typeIcon = (key) => TYPE_ICONS[String(key ?? "").toLowerCase()] ?? "fa-sack-dollar";
 
+
+/* -------------------------------------------- */
+/*  Taschendiebstahl und Schlösser               */
+/* -------------------------------------------- */
+
+/** Zahl größer 0 oder null (leeres Feld = nicht gesetzt). */
+const posInt = (v) => {
+  const n = Math.floor(Number(v));
+  return Number.isFinite(n) && n > 0 ? n : null;
+};
+
+/**
+ * Schwierigkeitsgrad des Taschendiebstahls: vom Spielleiter gesetzt, sonst die passive Wahrnehmung des Ziels.
+ * @param {object|undefined} cfg  Token-Einstellung { dc?: number }
+ * @param {number} passive        passive Wahrnehmung des Ziels
+ */
+export function pickpocketDc(cfg, passive) {
+  return posInt(cfg?.dc) ?? posInt(passive) ?? 10;
+}
+
+/** Erfolg, wenn der Wurf den SG erreicht. */
+export const pickpocketSucceeded = (dc, total) => Number(total) >= dc;
+
+/**
+ * Status eines Diebes bei einem Ziel: "open" (noch nichts versucht), "success", "failed".
+ * thieves: { [actorId]: { status, granted } }
+ */
+export function pickpocketStatus(thieves, actorId) {
+  const s = thieves?.[actorId]?.status;
+  return s === "success" || s === "failed" ? s : "open";
+}
+export const pickpocketGranted = (thieves, actorId) => Boolean(thieves?.[actorId]?.granted) && pickpocketStatus(thieves, actorId) === "success";
+
+/** Ist Taschendiebstahl an diesem Token erlaubt? Token-Einstellung vor Welt-Einstellung. */
+export function pickpocketAllowed(cfg, worldDefault) {
+  return typeof cfg?.enabled === "boolean" ? cfg.enabled : Boolean(worldDefault);
+}
+
+/** Schloss-Einstellung einer Tür bereinigen. dc = null: Schloss lässt sich nicht knacken. */
+export function normalizeLock(raw = {}) {
+  return {
+    dc: posInt(raw?.dc),
+    needTool: raw?.needTool !== false,
+    keyName: String(raw?.keyName ?? "").trim(),
+    keyUuid: String(raw?.keyUuid ?? "").trim()
+  };
+}
+
+/** Hat die Tür überhaupt etwas, womit man sie öffnen kann? */
+export const lockHasOptions = (lock) => Boolean(lock.dc || lock.keyName || lock.keyUuid);
+
+/** Diebeswerkzeug: dnd5e-Werkzeug mit Basis "thief" oder ein Name mit Diebes-/Thieves-Bezug. */
+export function isThievesTools(item) {
+  if (!item || item.type !== "tool") return false;
+  if (item.system?.type?.baseItem === "thief" || item.system?.baseItem === "thief") return true;
+  return /thie(f|ves)|dieb/i.test(String(item.name ?? ""));
+}
+export const findThievesTools = (items) => items.find(isThievesTools) ?? null;
+
+/** Passt dieser Gegenstand zum Schlüssel der Tür? Name (ohne Groß-/Kleinschreibung) oder Quell-UUID. */
+export function keyMatches(item, lock) {
+  if (!item) return false;
+  const name = String(item.name ?? "").trim().toLowerCase();
+  if (lock.keyName && name === lock.keyName.toLowerCase()) return true;
+  if (lock.keyUuid) {
+    const source = item._stats?.compendiumSource ?? item.flags?.core?.sourceId ?? item.system?.sourceId;
+    if (source && source === lock.keyUuid) return true;
+    if (item.uuid && item.uuid === lock.keyUuid) return true;
+  }
+  return false;
+}
+export const findKey = (items, lock) => items.find((i) => keyMatches(i, lock)) ?? null;

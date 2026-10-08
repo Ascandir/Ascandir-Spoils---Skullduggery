@@ -31,6 +31,10 @@ export class LootApp extends Base {
       unlock: LootApp.onUnlock,
       gmRemove: LootApp.onGmRemove,
       openTable: LootApp.onOpenTable,
+      pickRoll: LootApp.onPickRoll,
+      pickConfig: LootApp.onPickConfig,
+      pickGrant: LootApp.onPickGrant,
+      pickReset: LootApp.onPickReset,
       refresh: LootApp.onRefresh
     }
   };
@@ -168,6 +172,59 @@ export class LootApp extends Base {
       this._busy = false;
       this.render();
     }
+  }
+
+  /** Taschendiebstahl: Die Spielleitung prüft, der Spieler würfelt Fingerfertigkeit, die Spielleitung wertet gegen den SG aus. */
+  static async onPickRoll() {
+    if (this._busy) return;
+    this._busy = true;
+    try {
+      const base = { tokenUuid: this.tokenUuid, looterUuid: this.looterUuid };
+      const check = await Service.request("pickCheck", base);
+      if (!check.ok) {
+        ui.notifications.warn(Service.errorText(check));
+        return;
+      }
+      const actor = fromUuidSync(this.looterUuid)?.actor;
+      const rolls = await actor?.rollSkill({ skill: check.skill }, {}, {});
+      if (!rolls?.length) return;
+      const res = await Service.request("pickResolve", { ...base, total: rolls[0].total });
+      if (!res.ok) ui.notifications.warn(Service.errorText(res));
+      else ui.notifications[res.success ? "info" : "warn"](game.i18n.localize(res.success ? "CLOOT.Pick.Success" : "CLOOT.Pick.Failure"));
+    } catch (err) {
+      console.error(`${MODULE_ID} |`, err);
+      ui.notifications.error(game.i18n.format("CLOOT.Err.Crash", { msg: err?.message ?? String(err) }));
+    } finally {
+      this._busy = false;
+      this.render();
+    }
+  }
+
+  /** Spielleitung: Taschendiebstahl an/aus und eigener Schwierigkeitsgrad. */
+  static async onPickConfig() {
+    const cfg = this.lootState?.pickGM;
+    if (!cfg) return;
+    const t = (k) => game.i18n.localize(k);
+    const data = await foundry.applications.api.DialogV2.prompt({
+      window: { title: t("CLOOT.Pick.Config"), icon: "fa-solid fa-hand-holding" },
+      content: `
+        <div class="form-group"><label>${t("CLOOT.Pick.Allow")}</label>
+          <div class="form-fields"><input type="checkbox" name="enabled" ${cfg.enabled ? "checked" : ""}></div></div>
+        <div class="form-group"><label>${t("CLOOT.Pick.DC")}</label>
+          <div class="form-fields"><input type="number" name="dc" min="1" step="1" value="${cfg.customDc}" placeholder="${cfg.passive}"></div>
+          <p class="hint">${game.i18n.format("CLOOT.Pick.DCHint", { passive: cfg.passive })}</p></div>`,
+      ok: { label: t("CLOOT.Pick.Save"), callback: (ev, button) => new foundry.applications.ux.FormDataExtended(button.form).object },
+      rejectClose: false
+    });
+    if (data) await this.act("pickSet", { enabled: data.enabled, dc: data.dc });
+  }
+
+  static async onPickGrant(event, target) {
+    await this.act("pickGrant", { actorId: target.dataset.actor });
+  }
+
+  static async onPickReset(event, target) {
+    await this.act("pickReset", { actorId: target.dataset.actor });
   }
 
   static async onUnlock(event, target) {

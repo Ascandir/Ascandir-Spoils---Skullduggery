@@ -1,5 +1,6 @@
-import { MODULE_ID, inRange, tokenDistance } from "./rules.mjs";
+import { MODULE_ID, inRange, tokenDistance, pickpocketAllowed } from "./rules.mjs";
 import * as Service from "./service.mjs";
+import { installDoorHook, addLockFields } from "./door.mjs";
 import { CSS } from "./styles.mjs";
 
 /**
@@ -67,6 +68,14 @@ Hooks.once("init", () => {
     type: Boolean,
     default: true
   });
+  game.settings.register(MODULE_ID, "pickpocket", {
+    name: "CLOOT.Setting.Pickpocket.Name",
+    hint: "CLOOT.Setting.Pickpocket.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
   game.settings.register(MODULE_ID, "doubleClick", {
     name: "CLOOT.Setting.DoubleClick.Name",
     hint: "CLOOT.Setting.DoubleClick.Hint",
@@ -93,6 +102,8 @@ Hooks.once("init", () => {
     default: "#7a1f27",
     onChange: applyAccent
   });
+
+  installDoorHook(looterToken);
 
   game.keybindings.register(MODULE_ID, "loot", {
     name: "CLOOT.Keybind.Loot",
@@ -139,6 +150,16 @@ function applyAccent() {
 
 /** Auf dem Spieler-PC prüfen wir nur grob. Die endgültige Prüfung macht immer die Spielleitung. */
 const isDeadClient = (td) => Boolean(td?.hasStatusEffect?.("dead") || td?.actor?.statuses?.has("dead"));
+
+/** Lebender NSC, den dieser Spieler bestehlen dürfte (die endgültige Prüfung macht die Spielleitung). */
+const isPickableClient = (td) =>
+  Boolean(
+    !game.user.isGM &&
+      td?.actor?.type === "npc" &&
+      !isDeadClient(td) &&
+      !td.actor.isOwner &&
+      pickpocketAllowed(td.getFlag(MODULE_ID, "pick"), game.settings.get(MODULE_ID, "pickpocket"))
+  );
 
 const rectOf = (td) => {
   const size = td.parent.grid.size;
@@ -249,7 +270,7 @@ export async function lootNearby() {
 
   // Mauszeiger liegt auf einer Leiche: genau die öffnen (so kommen auch Spieler an fremde Token)
   const hovered = canvas.tokens.hover?.document;
-  if (hovered && isDeadClient(hovered)) {
+  if (hovered && (isDeadClient(hovered) || isPickableClient(hovered))) {
     const looter = looterToken();
     if (!game.user.isGM && !looter) {
       ui.notifications.warn(t("CLOOT.Notify.SelectToken"));
@@ -399,7 +420,7 @@ export async function onBoardDoubleClick(ev) {
     const point = canvas.canvasCoordinatesFromClient?.({ x: ev.clientX, y: ev.clientY }) ?? canvas.mousePosition;
     if (!point) return;
     const corpse = canvas.tokens.placeables
-      .filter((tk) => tk.visible && isDeadClient(tk.document) && tk.bounds.contains(point.x, point.y))
+      .filter((tk) => tk.visible && (isDeadClient(tk.document) || isPickableClient(tk.document)) && tk.bounds.contains(point.x, point.y))
       .sort((a, b) => (b.document.elevation ?? 0) - (a.document.elevation ?? 0))[0];
     if (!corpse) return;
     const looter = looterToken();
@@ -412,3 +433,9 @@ export async function onBoardDoubleClick(ev) {
     reportError(err);
   }
 }
+
+/* -------------------------------------------- */
+/*  Schlösser: Felder im Wand-Fenster            */
+/* -------------------------------------------- */
+
+Hooks.on("renderWallConfig", (app, html) => addLockFields(app, html));

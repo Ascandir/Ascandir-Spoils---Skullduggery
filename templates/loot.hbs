@@ -39,9 +39,42 @@
       </div>
     </header>
 
-    {{#if state.locked}}
+    {{#if state.pick.open}}
+      <p class="bag-notice">{{localize "CLOOT.Pick.Intro"}}</p>
+      <div class="bag-foot">
+        <button type="button" class="bag-big" data-action="pickRoll"><i class="fa-solid fa-hand-holding"></i> <span>{{localize "CLOOT.Pick.Try"}}</span></button>
+      </div>
+    {{else if state.pick.failed}}
+      <p class="bag-notice">{{localize "CLOOT.Pick.Failed"}}</p>
+    {{else if state.locked}}
       <p class="bag-notice">{{localize "CLOOT.WaitForGM"}}</p>
     {{else}}
+      {{#if state.pick.waiting}}
+      <p class="bag-notice">{{localize "CLOOT.Pick.Waiting"}}</p>
+      {{/if}}
+      {{#if state.pickGM}}
+      <div class="bag-pick">
+        <div class="bag-pick-head">
+          <span class="bag-label">{{localize "CLOOT.Pick.Section"}}</span>
+          <span class="bag-pick-info">
+            {{#if state.pickGM.enabled}}{{localize "CLOOT.Pick.On"}} · {{localize "CLOOT.Pick.DC"}} {{state.pickGM.dc}}{{#unless state.pickGM.custom}} ({{localize "CLOOT.Pick.Passive"}} {{state.pickGM.passive}}){{/unless}}
+            {{else}}{{localize "CLOOT.Pick.Off"}}{{/if}}
+          </span>
+          <button type="button" class="bag-ibtn" data-action="pickConfig" data-tooltip="CLOOT.Pick.Config"><i class="fa-solid fa-gear"></i></button>
+        </div>
+        {{#each state.pickGM.thieves}}
+        <div class="bag-pick-row">
+          <span class="bag-name">{{name}}</span>
+          {{#if isSuccess}}
+            <button type="button" class="bag-btn" data-action="pickGrant" data-actor="{{id}}">
+              {{#if granted}}<i class="fa-solid fa-lock"></i> {{localize "CLOOT.Pick.Lock"}}{{else}}<i class="fa-solid fa-unlock"></i> {{localize "CLOOT.Pick.Grant"}}{{/if}}
+            </button>
+          {{else}}<span class="bag-badge">{{localize "CLOOT.Pick.Caught"}}</span>{{/if}}
+          <button type="button" class="bag-ibtn" data-action="pickReset" data-actor="{{id}}" data-tooltip="CLOOT.Pick.Reset"><i class="fa-solid fa-rotate-left"></i></button>
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
       {{#if state.hasCoins}}
       <div class="bag-coins">
         {{#each coinList}}

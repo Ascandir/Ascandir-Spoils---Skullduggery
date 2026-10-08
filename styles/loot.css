@@ -351,3 +351,12 @@
   .bag-item .bag-col { display: none; }
   .bag-panel .bag-big span { display: none; }
 }
+
+/* Taschendiebstahl (Spielleitung) */
+.bag-pick { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0.7rem; border: 1px solid var(--bag-line); border-radius: 6px; background: rgba(0, 0, 0, 0.25); }
+.bag-pick-head { display: flex; align-items: center; gap: 0.6rem; }
+.bag-pick-head .bag-label { flex: 0 0 auto; }
+.bag-pick-info { flex: 1 1 auto; font-style: italic; color: var(--bag-mute); }
+.bag-pick-row { display: flex; align-items: center; gap: 0.5rem; }
+.bag-pick-row .bag-name { flex: 1 1 auto; }
+.corpse-loot-lock { margin-top: 0.5rem; }

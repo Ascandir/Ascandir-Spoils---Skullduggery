@@ -1,3 +1,6 @@
+# Baut bei jedem neuen Versions-Tag (z. B. v0.14.2) automatisch das Modul-Paket
+# und legt eine GitHub-Release an. Foundry installiert/aktualisiert über die
+# "module.json" der neuesten Release.
 name: Release
 
 on:
@@ -14,11 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Version und Download-Adressen eintragen
+      - name: Version aus dem Tag übernehmen und Download-Adressen eintragen
         run: |
           python3 .github/set_urls.py "${GITHUB_REF_NAME}" "${GITHUB_REPOSITORY}"
 
-      - name: Paket bauen
+      - name: Paket bauen (module.json liegt direkt im Zip, ohne Zusatzordner)
         run: |
           zip -r module.zip . -x ".git/*" ".github/*" ".gitignore" "*.zip"
 

@@ -1,4 +1,4 @@
-# Corpse Loot (Beute plündern) v0.14.1
+# Corpse Loot (Beute plündern) v0.15.0
 
 Tote NSCs (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
@@ -127,3 +127,23 @@ Die Regeln gelten weiter (Freigabe, Reichweite, nur eigene Token, Spielleitungs-
 Schreiben darf der Spieler aber nur, was Foundry ihm erlaubt: Für Gegenstände und Münzen von der Leiche braucht er Besitzer-Rechte
 am NSC (oder den Test macht ein Konto mit Assistent-SL-Rechten). Fehlt die Berechtigung, erscheint eine verständliche Meldung,
 und der Gegenstand bleibt bei der Leiche.
+
+## Taschendiebstahl (lebende NSC)
+
+Ein Spieler kann einen lebenden NSC per Doppelklick oder mit der Taste L (Maus auf dem Token) bestehlen, sofern er in Reichweite ist.
+Er würfelt Fingerfertigkeit gegen den SG. Der SG ist standardmäßig die **passive Wahrnehmung** des Ziels, die Spielleitung kann im Beute-Fenster (Zahnrad im Abschnitt „Taschendiebstahl“) einen eigenen SG setzen oder das Stehlen für diesen Token ausschalten.
+
+- Misserfolg: Der Dieb wird erwischt (Chatnachricht für alle), mehr Versuche gibt es nicht.
+- Erfolg: Der Dieb sieht die Beute, kann aber nichts nehmen. Die Spielleitung bekommt eine private Chatnachricht und gibt die Beute im Beute-Fenster **pro Dieb** frei oder sperrt sie wieder.
+- Die Spielleitung kann einen Versuch zurücksetzen.
+- Die Einstellung „Taschendiebstahl erlauben“ in den Moduleinstellungen gilt als Standard für alle Token.
+
+## Verschlossene Türen
+
+Im Fenster einer Wand/Tür (Spielleitung) gibt es den Abschnitt **Schloss (Corpse Loot)**:
+
+- **SG zum Knacken:** leer = das Schloss lässt sich nicht knacken.
+- **Diebeswerkzeug nötig:** Haken an = der Charakter braucht Diebeswerkzeug (Werkzeug „Thieves' Tools“ / Name mit „Diebes“).
+- **Schlüssel:** einen Gegenstand ins Feld ziehen oder den Namen eintippen. Wer einen Gegenstand mit genau diesem Namen im Inventar hat, schließt die Tür damit auf.
+
+Klickt ein Spieler auf eine Tür, die auf „Verschlossen“ steht und ein Schloss eingestellt hat, erscheint ein Fenster: Schlüssel benutzen oder Schloss knacken (Fingerfertigkeit). Bei Erfolg wird die Tür entriegelt (sie steht danach auf „Geschlossen“). Türen ohne Schloss-Einstellung verhalten sich wie bisher.
