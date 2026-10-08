@@ -158,7 +158,7 @@ const isDeadClient = (td) => Boolean(td?.hasStatusEffect?.("dead") || td?.actor?
 const isPickableClient = (td) => {
   if (game.user.isGM || !td || td.isOwner) return false;
   const type = td.actor?.type;
-  if (type && type !== "npc") return false;
+  if (type && type !== "npc" && type !== "character") return false;
   if (isDeadClient(td)) return false;
   return pickpocketAllowed(td.getFlag(MODULE_ID, "pick"), game.settings.get(MODULE_ID, "pickpocket"));
 };

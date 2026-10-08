@@ -127,9 +127,12 @@ function changed(tokenUuid) {
 /*  Prüfungen (laufen immer beim Spielleiter)    */
 /* -------------------------------------------- */
 
+/** Beute und Taschendiebstahl gibt es bei NSC und bei Spielercharakteren. */
+const LOOTABLE_ACTORS = ["npc", "character"];
+
 export function isCorpse(tokenDoc) {
   const actor = tokenDoc?.actor;
-  if (!actor || actor.type !== "npc") return false;
+  if (!actor || !LOOTABLE_ACTORS.includes(actor.type)) return false;
   return Boolean(actor.statuses?.has("dead") || tokenDoc.hasStatusEffect?.("dead"));
 }
 
@@ -184,7 +187,7 @@ function resolve(user, p) {
   const isGM = user.isGM;
   // Lebende NSC: Die Spielleitung darf sie öffnen (z. B. um etwas vorab zu geben), Spieler nur per Taschendiebstahl.
   const alive = !isCorpse(corpse);
-  if (alive && corpse.actor.type !== "npc") return fail("CLOOT.Err.NotDead");
+  if (alive && !LOOTABLE_ACTORS.includes(corpse.actor.type)) return fail("CLOOT.Err.NotDead");
   const pickCfg = corpse.getFlag(MODULE_ID, "pick") ?? {};
   if (alive && !isGM && !pickpocketAllowed(pickCfg, game.settings.get(MODULE_ID, "pickpocket"))) return fail("CLOOT.Err.NotDead");
   const looter = p.looterUuid ? fromUuidSync(p.looterUuid) : null;

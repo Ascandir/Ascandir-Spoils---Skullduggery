@@ -1,6 +1,6 @@
-# Corpse Loot (Beute plündern) v0.15.1
+# Ascandir – Spoils & Skullduggery v0.16.0
 
-Tote NSCs (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
+Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
 ## Benutzung
 **Spieler**
@@ -130,7 +130,7 @@ und der Gegenstand bleibt bei der Leiche.
 
 ## Taschendiebstahl (lebende NSC)
 
-Ein Spieler kann einen lebenden NSC per Doppelklick oder mit der Taste L (Maus auf dem Token) bestehlen, sofern er in Reichweite ist.
+Ein Spieler kann einen lebenden NSC oder Spielercharakter (eines anderen Spielers) per Doppelklick oder mit der Taste L (Maus auf dem Token) bestehlen, sofern er in Reichweite ist.
 Er würfelt Fingerfertigkeit gegen den SG. Der SG ist standardmäßig die **passive Wahrnehmung** des Ziels, die Spielleitung kann im Beute-Fenster (Zahnrad im Abschnitt „Taschendiebstahl“) einen eigenen SG setzen oder das Stehlen für diesen Token ausschalten.
 
 - Misserfolg: Der Dieb wird erwischt (Chatnachricht für alle), mehr Versuche gibt es nicht.

@@ -1,8 +1,8 @@
 {
   "id": "corpse-loot",
-  "title": "Corpse Loot by Ascandir",
-  "description": "Tote NSCs (Totenkopf-Status) lassen sich im Umkreis plündern: Übersicht über Inventar und Münzen, einzeln oder komplett nehmen, direkt ins Gruppeninventar schicken, optional mit Freigabe durch die Spielleitung.",
-  "version": "0.15.1",
+  "title": "Ascandir – Spoils & Skullduggery",
+  "description": "Beute plündern, Tiere ausnehmen, Taschen ausräumen, Schlösser knacken: Plündern von Leichen (Beute-Tabellen, Ernte, Item Piles), Taschendiebstahl bei lebenden Token (NSC und Spielercharaktere) und verschlossene Türen mit Schlüsseln und Diebeswerkzeug.",
+  "version": "0.16.0",
   "authors": [
     {
       "name": "Ascandir"
