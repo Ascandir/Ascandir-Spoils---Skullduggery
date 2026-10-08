@@ -164,8 +164,12 @@ export function isPile(actor) {
 
 /** Tresor-Actors von Item Piles (auch wenn das Modul gerade nicht aktiv ist). */
 export const isVaultActor = (a) => {
-  const d = a?.getFlag?.("item-piles", "data");
-  return Boolean(d?.enabled && d.type === "vault");
+  try {
+    const d = a?.getFlag?.("item-piles", "data");
+    return Boolean(d?.enabled && d.type === "vault");
+  } catch {
+    return false; // Item Piles nicht aktiv: Foundry kennt den Flag-Bereich dann nicht
+  }
 };
 
 /**

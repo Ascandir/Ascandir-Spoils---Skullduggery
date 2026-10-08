@@ -120,9 +120,15 @@ Hooks.once("init", () => {
 // Party-Inventar wählbar machen: dnd5e-Gruppen und Item-Piles-Tresore stehen zur Auswahl
 Hooks.once("setup", () => {
   const choices = { auto: "CLOOT.Setting.Party.Auto" };
+  const piles = Boolean(game.modules.get("item-piles")?.active);
   for (const a of game.actors) {
-    const pile = a.getFlag?.("item-piles", "data");
-    if (a.type === "group" || pile?.enabled) choices[a.id] = a.name;
+    try {
+      // Der Flag-Bereich "item-piles" existiert nur, wenn das Modul aktiv ist, sonst wirft Foundry einen Fehler
+      const pile = piles ? a.getFlag("item-piles", "data") : null;
+      if (a.type === "group" || pile?.enabled) choices[a.id] = a.name;
+    } catch (err) {
+      console.warn(`${MODULE_ID} | Actor ${a?.name} übersprungen`, err);
+    }
   }
   game.settings.register(MODULE_ID, "partyActor", {
     name: "CLOOT.Setting.Party.Name",
