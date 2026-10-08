@@ -1,15 +1,29 @@
-# Baut bei jedem neuen Versions-Tag (z. B. v0.14.2) automatisch das Modul-Paket
-# und legt eine GitHub-Release an. Foundry installiert/aktualisiert über die
-# "module.json" der neuesten Release.
+# Baut das Modul-Paket und hängt module.json + module.zip an die GitHub-Release.
+# Startet automatisch, wenn eine Release veröffentlicht wird (egal ob der Tag "v0.16.0" oder "0.16.0" heißt),
+# bei einem neuen Tag "v..." und per Hand über Actions > Release > Run workflow.
 name: Release
 
 on:
+  release:
+    types: [published]
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag der Release, z. B. 0.16.0 (so wie er bei GitHub heißt)"
+        required: true
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.event.release.tag_name || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.event.inputs.tag || github.event.release.tag_name || github.ref_name }}
 
 jobs:
   release:
@@ -17,17 +31,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Version aus dem Tag übernehmen und Download-Adressen eintragen
+      - name: Version und Download-Adressen eintragen
         run: |
-          python3 .github/set_urls.py "${GITHUB_REF_NAME}" "${GITHUB_REPOSITORY}"
+          python3 .github/set_urls.py "${TAG}" "${GITHUB_REPOSITORY}"
 
       - name: Paket bauen (module.json liegt direkt im Zip, ohne Zusatzordner)
         run: |
           zip -r module.zip . -x ".git/*" ".github/*" ".gitignore" "*.zip"
 
-      - name: Release veröffentlichen
+      - name: Dateien an die Release hängen
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.TAG }}
           files: |
             module.json
             module.zip
