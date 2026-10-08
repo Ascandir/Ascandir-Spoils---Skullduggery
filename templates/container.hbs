@@ -1,0 +1,38 @@
+<div class="cl-cont">
+  <header class="cl-cont-head">
+    <img src="{{actor.img}}" alt="" data-edit="img" {{#if editable}}data-action="editImage"{{/if}}>
+    <div class="cl-cont-title">
+      <input type="text" name="name" value="{{actor.name}}" {{#unless editable}}disabled{{/unless}}>
+      <small>{{localize "CLOOT.Container.Type"}}</small>
+    </div>
+    {{#if isGM}}
+    <div class="cl-cont-tools">
+      <button type="button" data-action="editTable"><i class="fa-solid fa-dice"></i> {{localize "CLOOT.Menu.Loottable"}}{{#if hasTable}} ✓{{/if}}</button>
+      <button type="button" data-action="editLock"><i class="fa-solid fa-lock"></i> {{localize "CLOOT.Menu.Lock"}}</button>
+    </div>
+    {{/if}}
+  </header>
+
+  <p class="hint">{{localize "CLOOT.Container.Hint"}}</p>
+
+  <div class="form-group stacked">
+    <label>{{localize "CLOOT.Container.Description"}}</label>
+    <textarea name="system.description" rows="3" {{#unless editable}}disabled{{/unless}}>{{system.description}}</textarea>
+  </div>
+
+  <div class="cl-cont-coins">
+    {{#each coins}}
+    <label><img src="modules/corpse-loot/assets/coin-{{key}}.svg" alt=""><input type="number" min="0" step="1" name="system.currency.{{key}}" value="{{value}}"><span>{{label}}</span></label>
+    {{/each}}
+  </div>
+
+  <ul class="cl-cont-items" data-drop>
+    {{#each items}}
+    <li>
+      <img src="{{img}}" alt=""><span class="n">{{name}}{{#if multi}} <em>×{{qty}}</em>{{/if}}</span>
+      <button type="button" data-action="removeItem" data-item-id="{{id}}" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-trash"></i></button>
+    </li>
+    {{/each}}
+    <li class="cl-cont-drop"><i class="fa-solid fa-plus"></i> {{localize "CLOOT.GMDrop"}}</li>
+  </ul>
+</div>

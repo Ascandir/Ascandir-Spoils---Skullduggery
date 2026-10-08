@@ -3,6 +3,8 @@
  */
 
 export const MODULE_ID = "corpse-loot";
+/** Eigener Actor-Typ: verschließbarer Container (Truhe, Fass, Schrank ...) mit Beute-Tabelle. */
+export const CONTAINER_TYPE = `${MODULE_ID}.container`;
 export const SOCKET = `module.${MODULE_ID}`;
 
 /** Diese Item-Typen gelten als Beute. Zauber, Klassen, Talente usw. nie. */

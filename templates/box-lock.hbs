@@ -1,0 +1,37 @@
+<div class="cl-th">
+  <p class="hint">{{#if isToken}}{{localize "CLOOT.Box.IntroToken"}}{{else}}{{localize "CLOOT.Box.IntroProto"}}{{/if}}</p>
+
+  <div class="form-group">
+    <label>{{localize "CLOOT.Box.Locked"}}</label>
+    <div class="form-fields"><input type="checkbox" name="locked" {{#if locked}}checked{{/if}}></div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "CLOOT.Door.DC"}}</label>
+    <div class="form-fields"><input type="number" min="1" step="1" name="dc" value="{{lock.dc}}"></div>
+    <p class="hint">{{localize "CLOOT.Door.DCHint"}}</p>
+  </div>
+  <div class="form-group">
+    <label>{{localize "CLOOT.Door.MaxTries"}}</label>
+    <div class="form-fields">
+      <input type="number" min="1" step="1" name="maxTries" value="{{lock.maxTries}}">
+      {{#if isToken}}<button type="button" data-action="resetTries" {{#unless hasAttempts}}disabled{{/unless}}><i class="fa-solid fa-rotate-left"></i> {{localize "CLOOT.Door.ResetTries"}}</button>{{/if}}
+    </div>
+    <p class="hint">{{localize "CLOOT.Door.MaxTriesHint"}}</p>
+  </div>
+  <div class="form-group">
+    <label>{{localize "CLOOT.Door.NeedToolsLabel"}}</label>
+    <div class="form-fields"><input type="checkbox" name="needTool" {{#if lock.needTool}}checked{{/if}}></div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "CLOOT.Door.KeyName"}}</label>
+    <div class="form-fields">
+      <input type="text" name="keyName" value="{{lock.keyName}}" placeholder="{{localize 'CLOOT.Door.KeyDrop'}}">
+      <input type="hidden" name="keyUuid" value="{{lock.keyUuid}}">
+    </div>
+    <p class="hint">{{localize "CLOOT.Door.KeyHint"}}</p>
+  </div>
+
+  <footer class="form-footer">
+    <button type="button" data-action="save"><i class="fa-solid fa-floppy-disk"></i> {{localize "CLOOT.Pick.Save"}}</button>
+  </footer>
+</div>

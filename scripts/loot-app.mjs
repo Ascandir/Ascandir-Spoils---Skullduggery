@@ -37,6 +37,8 @@ export class LootApp extends Base {
       pickReset: LootApp.onPickReset,
       pickItem: LootApp.onPickItem,
       pickCoins: LootApp.onPickCoins,
+      openLock: LootApp.onOpenLock,
+      boxConfig: LootApp.onBoxConfig,
       refresh: LootApp.onRefresh
     }
   };
@@ -253,6 +255,25 @@ export class LootApp extends Base {
 
   static async onRoll() {
     await this.act("roll");
+  }
+
+  /** Verschlossener Container: Schloss-Fenster (Schlüssel benutzen oder knacken). */
+  static async onOpenLock() {
+    const looter = this.looterUuid;
+    if (!looter) {
+      ui.notifications.warn(game.i18n.localize("CLOOT.Notify.SelectToken"));
+      return;
+    }
+    const { LockApp } = await import("./lock-app.mjs");
+    const id = `${MODULE_ID}-lock-${this.tokenUuid.replaceAll(".", "-")}`;
+    const existing = foundry.applications.instances.get(id);
+    if (existing) return existing.render({ force: true });
+    new LockApp({ wallUuid: this.tokenUuid, looterUuid: looter }).render({ force: true });
+  }
+
+  static async onBoxConfig() {
+    const doc = fromUuidSync(this.tokenUuid);
+    if (doc) await game.modules.get(MODULE_ID).api.editLock(doc);
   }
 
   static async onRefresh() {

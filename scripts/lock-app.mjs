@@ -33,7 +33,7 @@ export class LockApp extends Base {
 
   /** @override */
   get title() {
-    return t("CLOOT.Door.Title");
+    return t(fromUuidSync(this.wallUuid)?.documentName === "Token" ? "CLOOT.Box.LockTitle" : "CLOOT.Door.Title");
   }
 
   /** @override */
@@ -46,13 +46,15 @@ export class LockApp extends Base {
       assets: `modules/${MODULE_ID}/assets`,
       bagOn: game.settings.get(MODULE_ID, "bag") !== false,
       message: this.message,
+      isBox: this.wallUuid && fromUuidSync(this.wallUuid)?.documentName === "Token",
       looterName: looter?.name ?? ""
     };
     if (!wall || !looter?.actor) return { ...base, gone: true };
 
     const lock = normalizeLock(wall.getFlag(MODULE_ID, "lock"));
     const items = looter.actor.items.contents;
-    const open = wall.ds !== CONST.WALL_DOOR_STATES.LOCKED;
+    const isBox = wall.documentName === "Token";
+    const open = !Service.isLockedTarget(wall);
     const left = triesLeft(lock, wall.getFlag(MODULE_ID, "attempts"), looter.actor.id);
     const hasKeyOption = Boolean(lock.keyName || lock.keyUuid);
     const hasPickOption = Boolean(lock.dc);

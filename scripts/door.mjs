@@ -69,6 +69,12 @@ Hooks.on("updateWall", (wall) => {
   app?.render();
 });
 
+// Gleiches für Container-Token
+Hooks.on("updateToken", (token) => {
+  const app = foundry.applications.instances.get(`${MODULE_ID}-lock-${token.uuid.replaceAll(".", "-")}`);
+  app?.render();
+});
+
 /* -------------------------------------------- */
 /*  Wand-Einstellungen (Spielleitung)            */
 /* -------------------------------------------- */

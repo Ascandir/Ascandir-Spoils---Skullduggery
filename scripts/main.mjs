@@ -1,6 +1,7 @@
-import { MODULE_ID, inRange, tokenDistance, pickpocketAllowed } from "./rules.mjs";
+import { MODULE_ID, CONTAINER_TYPE, inRange, tokenDistance, pickpocketAllowed } from "./rules.mjs";
 import * as Service from "./service.mjs";
 import { installDoorHook, addLockFields } from "./door.mjs";
+import { registerContainer } from "./container.mjs";
 import { CSS } from "./styles.mjs";
 
 /**
@@ -30,6 +31,7 @@ function reportError(err) {
 /* -------------------------------------------- */
 
 Hooks.once("init", () => {
+  registerContainer();
   game.settings.register(MODULE_ID, "range", {
     name: "CLOOT.Setting.Range.Name",
     hint: "CLOOT.Setting.Range.Hint",
@@ -136,7 +138,7 @@ Hooks.once("setup", () => {
 Hooks.once("ready", () => {
   Service.initSocket();
   applyAccent();
-  game.modules.get(MODULE_ID).api = { lootNearby, openLoot, editTable, editHarvest, editThievery, rollLoot: rollSelected };
+  game.modules.get(MODULE_ID).api = { lootNearby, openLoot, editTable, editHarvest, editThievery, rollLoot: rollSelected, editLock };
 });
 
 function applyAccent() {
@@ -149,7 +151,7 @@ function applyAccent() {
 /* -------------------------------------------- */
 
 /** Auf dem Spieler-PC prüfen wir nur grob. Die endgültige Prüfung macht immer die Spielleitung. */
-const isDeadClient = (td) => Boolean(td?.hasStatusEffect?.("dead") || td?.actor?.statuses?.has("dead"));
+const isDeadClient = (td) => Boolean(td?.hasStatusEffect?.("dead") || td?.actor?.statuses?.has("dead") || td?.actor?.type === CONTAINER_TYPE || td?.getFlag?.(MODULE_ID, "box"));
 
 /**
  * Lebender NSC, den dieser Spieler bestehlen dürfte. Spieler kennen fremde NSC oft gar nicht als Actor
@@ -223,7 +225,7 @@ export async function editTable(actorOrName, tab = "table") {
   try {
     if (!game.user.isGM) return;
     const actor = typeof actorOrName === "string" ? game.actors.getName(actorOrName) : actorOrName;
-    if (!actor || actor.type !== "npc") {
+    if (!actor || (actor.type !== "npc" && actor.type !== CONTAINER_TYPE)) {
       ui.notifications.warn(t("CLOOT.Notify.TableNeedsNpc"));
       return;
     }
@@ -257,6 +259,19 @@ export async function editThievery(tokenOrActor) {
   }
 }
 
+/** Schloss-Einstellungen eines Containers (Token oder Vorlage). Akzeptiert Token, Actor oder { token, actor }. */
+export async function editLock(arg) {
+  try {
+    if (!game.user.isGM) return;
+    const { openBoxLock } = await import("./box-app.mjs");
+    if (arg?.documentName === "Token") return openBoxLock({ token: arg, actor: arg.baseActor ?? arg.actor });
+    if (arg?.documentName === "Actor") return openBoxLock({ actor: arg });
+    return openBoxLock({ token: arg?.token ?? null, actor: arg?.actor });
+  } catch (err) {
+    reportError(err);
+  }
+}
+
 /**
  * Menüpunkt „Ascandir“ unter den drei Punkten von Charakterbögen und Token-Einstellungen.
  * Darunter: Loottable (nur bei NSC-Actors) und Thievery (bei allen).
@@ -272,9 +287,12 @@ export async function openAscandirMenu(doc) {
 
     // Token-Konfiguration / Token-Actor: Einstellungen gelten für diesen Token. Actor-Bogen: für die Vorlage (neue Token).
     const target = isTokenDoc ? doc : actor.isToken && actor.token ? actor.token : base;
+    const isBox = base?.type === CONTAINER_TYPE;
     const buttons = [
-      { action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice", disabled: base?.type !== "npc" },
-      { action: "thief", label: t("CLOOT.Menu.Thievery"), icon: "fa-solid fa-hand-holding" }
+      { action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice", disabled: base?.type !== "npc" && !isBox },
+      isBox
+        ? { action: "lock", label: t("CLOOT.Menu.Lock"), icon: "fa-solid fa-lock" }
+        : { action: "thief", label: t("CLOOT.Menu.Thievery"), icon: "fa-solid fa-hand-holding" }
     ];
 
     const choice = await foundry.applications.api.DialogV2.wait({
@@ -288,6 +306,7 @@ export async function openAscandirMenu(doc) {
     if (!choice) return;
     if (choice === "table") return editTable(base);
     if (choice === "thief") return editThievery(target);
+    if (choice === "lock") return editLock(target);
   } catch (err) {
     reportError(err);
   }
@@ -380,9 +399,10 @@ Hooks.on("renderTokenHUD", (hud, html) => {
     if (game.user.isGM && td.actor) {
       const type = td.actor.type;
       // Spielleitung: Beute-Fenster auch für lebende Token (z. B. um vorab etwas zu geben oder einen Diebstahl zu prüfen)
-      if (showLoot && (type === "npc" || type === "character")) buttons.push({ icon: "fa-sack-dollar", tip: "CLOOT.Keybind.Loot", run: () => openLoot(td, null) });
-      if (type === "npc") buttons.push({ icon: "fa-dice", tip: "CLOOT.Table.Open", run: () => editTable(td.baseActor ?? td.actor) });
-      buttons.push({ icon: "fa-hand-holding", tip: "CLOOT.Menu.Thievery", run: () => editThievery(td) });
+      if (showLoot && (type === "npc" || type === "character" || type === CONTAINER_TYPE)) buttons.push({ icon: "fa-sack-dollar", tip: "CLOOT.Keybind.Loot", run: () => openLoot(td, null) });
+      if (type === "npc" || type === CONTAINER_TYPE) buttons.push({ icon: "fa-dice", tip: "CLOOT.Table.Open", run: () => editTable(td.baseActor ?? td.actor) });
+      if (type === CONTAINER_TYPE) buttons.push({ icon: "fa-lock", tip: "CLOOT.Menu.Lock", run: () => editLock(td) });
+      else buttons.push({ icon: "fa-hand-holding", tip: "CLOOT.Menu.Thievery", run: () => editThievery(td) });
     } else if (!isDeadClient(td) && showLoot && corpsesNear(td).length) {
       buttons.push({ icon: "fa-sack-dollar", tip: "CLOOT.Keybind.Loot", run: () => lootNearby() });
     }
@@ -415,7 +435,7 @@ Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {
   try {
     const doc = app.document;
     if (!game.user.isGM || !doc) return;
-    const ok = (doc.documentName === "Actor" && ["npc", "character"].includes(doc.type)) || doc.documentName === "Token";
+    const ok = (doc.documentName === "Actor" && ["npc", "character", CONTAINER_TYPE].includes(doc.type)) || doc.documentName === "Token";
     if (!ok || controls.some((c) => c.action === "corpseLootMenu")) return;
     controls.push({
       icon: "fa-solid fa-skull",
@@ -451,6 +471,8 @@ Hooks.on("createActiveEffect", (effect) => {
 
 // Token auf die Karte gezogen: sofort würfeln
 Hooks.on("createToken", (td) => {
+  // Container würfeln ihre Beute immer beim Platzieren, NSC je nach Einstellung
+  if (td.actor?.type === CONTAINER_TYPE) return autoRoll(td);
   if (game.settings.get(MODULE_ID, "rollWhen") !== "placement") return;
   if (td.actor?.type !== "npc") return;
   autoRoll(td);

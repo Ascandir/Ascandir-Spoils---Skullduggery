@@ -242,5 +242,19 @@
   "CLOOT.Thief.ResetAll": "Reset all",
   "CLOOT.Thief.Success": "succeeded",
   "CLOOT.Thief.NoThieves": "Nobody has tried yet.",
-  "CLOOT.Thief.Saved": "Saved."
+  "CLOOT.Thief.Saved": "Saved.",
+  "CLOOT.Container.Type": "Container",
+  "CLOOT.Container.Sheet": "Ascandir Container",
+  "TYPES.Actor.corpse-loot.container": "Container",
+  "CLOOT.Container.Hint": "Chest, barrel, cupboard ... Drag items in or use “Loot table” for random loot. Every placed token rolls its own loot.",
+  "CLOOT.Container.Description": "Description",
+  "CLOOT.Menu.Lock": "Lock",
+  "CLOOT.Box.Title": "Lock: {name}",
+  "CLOOT.Box.LockTitle": "Locked container",
+  "CLOOT.Box.Saved": "Lock saved.",
+  "CLOOT.Box.IntroToken": "Applies to this container on the map. Without a DC and without a key it cannot be opened.",
+  "CLOOT.Box.IntroProto": "Applies to all containers placed from this template from now on. Change tokens already on the map through their menu.",
+  "CLOOT.Box.Locked": "Locked",
+  "CLOOT.Box.Closed": "This container is locked.",
+  "CLOOT.Box.OpenLock": "Open lock"
 }

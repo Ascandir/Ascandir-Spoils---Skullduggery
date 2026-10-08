@@ -1,5 +1,6 @@
 import {
   MODULE_ID,
+  CONTAINER_TYPE,
   SOCKET,
   isLootableItem,
   inRange,
@@ -135,11 +136,12 @@ function changed(tokenUuid) {
 /* -------------------------------------------- */
 
 /** Beute und Taschendiebstahl gibt es bei NSC und bei Spielercharakteren. */
-const LOOTABLE_ACTORS = ["npc", "character"];
+const LOOTABLE_ACTORS = ["npc", "character", CONTAINER_TYPE];
 
 export function isCorpse(tokenDoc) {
   const actor = tokenDoc?.actor;
   if (!actor || !LOOTABLE_ACTORS.includes(actor.type)) return false;
+  if (actor.type === CONTAINER_TYPE) return true; // Container sind immer "offen" (außer das Schloss ist zu)
   return Boolean(actor.statuses?.has("dead") || tokenDoc.hasStatusEffect?.("dead"));
 }
 
@@ -212,10 +214,18 @@ function resolve(user, p) {
     if (!inRange(rectOf(looter), rectOf(corpse), gridOf(corpse.parent), range)) return fail("CLOOT.Err.TooFar");
   }
 
-  const requireRelease = !game.settings.get(MODULE_ID, "autoRelease");
+  const isBox = corpse.actor.type === CONTAINER_TYPE;
+  const requireRelease = !isBox && !game.settings.get(MODULE_ID, "autoRelease");
   const released = Boolean(corpse.getFlag(MODULE_ID, "released"));
   let locked = !isGM && requireRelease && !released;
   let hidden = locked;
+
+  // Container mit geschlossenem Schloss: Spieler sehen nichts, bis es geöffnet ist
+  const boxLocked = isBox && !isGM && Boolean(corpse.getFlag(MODULE_ID, "boxLocked"));
+  if (boxLocked) {
+    locked = true;
+    hidden = true;
+  }
 
   // Taschendiebstahl: erst Probe, bei Erfolg sieht man alles, nehmen darf man erst nach Freigabe der Spielleitung
   let pick = null;
@@ -228,7 +238,7 @@ function resolve(user, p) {
     locked = pick.status !== "success";
   }
 
-  return { ok: true, user, isGM, alive, corpse, actor: corpse.actor, looter, canTake: canTake && !locked, locked, hidden, pick, released, requireRelease };
+  return { ok: true, user, isGM, alive, corpse, actor: corpse.actor, looter, canTake: canTake && !locked, locked, hidden, pick, released, requireRelease, isBox, boxLocked };
 }
 
 /* -------------------------------------------- */
@@ -320,7 +330,10 @@ function buildState(ctx) {
     isGM: ctx.isGM,
     released: ctx.released,
     requireRelease: ctx.requireRelease,
-    locked: ctx.locked && !ctx.pick,
+    locked: ctx.locked && !ctx.pick && !ctx.boxLocked,
+    isBox: ctx.isBox,
+    boxLocked: ctx.boxLocked,
+    boxLockedGM: ctx.isBox && ctx.isGM && Boolean(ctx.corpse.getFlag(MODULE_ID, "boxLocked")),
     canTake: ctx.canTake,
     canTakeCoins,
     canTakeAny: items.some((i) => i.canTake) || (coins.length > 0 && canTakeCoins),
@@ -526,7 +539,7 @@ async function rollOp(ctx) {
  */
 export async function rollLoot(tokenDoc, { force = false, quiet = false } = {}) {
   const actor = tokenDoc?.actor;
-  if (!actor || actor.type !== "npc") return fail("CLOOT.Err.NoCorpse");
+  if (!actor || (actor.type !== "npc" && actor.type !== CONTAINER_TYPE)) return fail("CLOOT.Err.NoCorpse");
   const raw = (tokenDoc.baseActor ?? actor).getFlag(MODULE_ID, "table");
   if (!raw) return fail("CLOOT.Err.NoTable");
   const table = normalizeTable(raw);
@@ -890,26 +903,40 @@ async function pickReset(ctx, p) {
 /* -------------------------------------------- */
 
 /** Prüfungen für alle Tür-Aktionen. */
+/** Ist dieses Dokument ein Container-Token? */
+const isBoxToken = (doc) => doc?.documentName === "Token" && doc.actor?.type === CONTAINER_TYPE;
+
+/** Ist die Tür verschlossen bzw. der Container zugesperrt? */
+export const isLockedTarget = (doc) =>
+  doc?.documentName === "Wall" ? doc.ds === CONST.WALL_DOOR_STATES.LOCKED : Boolean(doc?.getFlag(MODULE_ID, "boxLocked"));
+
 function doorContext(user, p) {
   const wall = p.wallUuid ? fromUuidSync(p.wallUuid) : null;
-  if (!wall || wall.documentName !== "Wall") return fail("CLOOT.Err.NoDoor");
-  if (wall.ds !== CONST.WALL_DOOR_STATES.LOCKED) return fail("CLOOT.Err.NotLockedDoor");
+  const isBox = isBoxToken(wall);
+  if (!wall || (wall.documentName !== "Wall" && !isBox)) return fail("CLOOT.Err.NoDoor");
+  if (!isLockedTarget(wall)) return fail("CLOOT.Err.NotLockedDoor");
   const looter = p.looterUuid ? fromUuidSync(p.looterUuid) : null;
   if (!looter?.actor) return fail("CLOOT.Err.NoLooter");
   if (!user.isGM && !looter.actor.testUserPermission(user, "OWNER")) return fail("CLOOT.Err.NotYourToken");
   if (looter.parent !== wall.parent) return fail("CLOOT.Err.OtherScene");
+  if (isBox && !user.isGM) {
+    const range = Number(game.settings.get(MODULE_ID, "range"));
+    if (!inRange(rectOf(looter), rectOf(wall), gridOf(wall.parent), range)) return fail("CLOOT.Err.TooFar");
+  }
   const lock = normalizeLock(wall.getFlag(MODULE_ID, "lock"));
   if (!lockHasOptions(lock)) return fail("CLOOT.Err.NoLockOptions");
-  return { ok: true, wall, looter, lock, user };
+  return { ok: true, wall, looter, lock, user, isBox };
 }
 
 async function unlockDoor(ctx, how) {
   // offen: die Versuchszähler gelten nur für das jeweils aktuelle Schloss
-  await ctx.wall.update({ ds: CONST.WALL_DOOR_STATES.CLOSED, [`flags.${MODULE_ID}.-=attempts`]: null });
+  if (ctx.isBox) await ctx.wall.update({ [`flags.${MODULE_ID}.boxLocked`]: false, [`flags.${MODULE_ID}.-=attempts`]: null });
+  else await ctx.wall.update({ ds: CONST.WALL_DOOR_STATES.CLOSED, [`flags.${MODULE_ID}.-=attempts`]: null });
   await ChatMessage.create({
     content: `<div class="corpse-loot-chat"><p>${how}</p></div>`,
     speaker: { alias: ctx.looter.name }
   });
+  if (ctx.isBox) changed(ctx.wall.uuid);
 }
 
 export async function doorHandle(user, op, p) {

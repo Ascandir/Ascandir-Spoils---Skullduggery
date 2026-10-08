@@ -15,7 +15,7 @@
   {{else}}
     <header class="bag-head">
       <div class="bag-title">
-        <h2>{{localize "CLOOT.Door.Title"}}</h2>
+        <h2>{{#if isBox}}{{localize "CLOOT.Box.LockTitle"}}{{else}}{{localize "CLOOT.Door.Title"}}{{/if}}</h2>
         <p class="bag-sub">{{#if open}}<i class="fa-solid fa-lock-open"></i> {{localize "CLOOT.Door.IsOpen"}}{{else}}<i class="fa-solid fa-lock"></i> {{localize "CLOOT.Door.Locked"}}{{/if}}{{#if looterName}} · {{looterName}}{{/if}}</p>
       </div>
     </header>

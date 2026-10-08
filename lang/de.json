@@ -242,5 +242,19 @@
   "CLOOT.Thief.ResetAll": "Alle zurücksetzen",
   "CLOOT.Thief.Success": "gelungen",
   "CLOOT.Thief.NoThieves": "Noch niemand hat es versucht.",
-  "CLOOT.Thief.Saved": "Gespeichert."
+  "CLOOT.Thief.Saved": "Gespeichert.",
+  "CLOOT.Container.Type": "Container",
+  "CLOOT.Container.Sheet": "Ascandir-Container",
+  "TYPES.Actor.corpse-loot.container": "Container",
+  "CLOOT.Container.Hint": "Truhe, Fass, Schrank ... Gegenstände hineinziehen oder über „Loottable“ zufällige Beute festlegen. Jeder platzierte Token würfelt seine eigene Beute.",
+  "CLOOT.Container.Description": "Beschreibung",
+  "CLOOT.Menu.Lock": "Schloss",
+  "CLOOT.Box.Title": "Schloss: {name}",
+  "CLOOT.Box.LockTitle": "Verschlossener Behälter",
+  "CLOOT.Box.Saved": "Schloss gespeichert.",
+  "CLOOT.Box.IntroToken": "Gilt für diesen Behälter auf der Karte. Ohne SG und ohne Schlüssel lässt er sich nicht öffnen.",
+  "CLOOT.Box.IntroProto": "Gilt für alle künftig platzierten Behälter dieser Vorlage. Bereits platzierte Token stellst du über ihr Menü ein.",
+  "CLOOT.Box.Locked": "Zugesperrt",
+  "CLOOT.Box.Closed": "Dieser Behälter ist verschlossen.",
+  "CLOOT.Box.OpenLock": "Schloss öffnen"
 }

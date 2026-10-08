@@ -25,6 +25,7 @@
         <button type="button" class="bag-ibtn" data-action="refresh" data-tooltip="CLOOT.Refresh"><i class="fa-solid fa-rotate"></i></button>
         {{#if state.isGM}}
           <button type="button" class="bag-ibtn" data-action="openTable" data-tooltip="CLOOT.Table.Open"><i class="fa-solid fa-dice"></i></button>
+          {{#if state.isBox}}<button type="button" class="bag-ibtn" data-action="boxConfig" data-tooltip="CLOOT.Menu.Lock"><i class="fa-solid {{#if state.boxLockedGM}}fa-lock{{else}}fa-lock-open{{/if}}"></i></button>{{/if}}
           {{#if state.canRoll}}
           <button type="button" class="bag-btn" data-action="roll" data-tooltip="CLOOT.RollHint">
             <i class="fa-solid fa-dice-d20"></i> {{#if state.rolled}}{{localize "CLOOT.Reroll"}}{{else}}{{localize "CLOOT.Roll"}}{{/if}}
@@ -46,6 +47,9 @@
       </div>
     {{else if state.pick.failed}}
       <p class="bag-notice">{{localize "CLOOT.Pick.Failed"}}</p>
+    {{else if state.boxLocked}}
+      <p class="bag-notice">{{localize "CLOOT.Box.Closed"}}</p>
+      <div class="bag-foot"><button type="button" class="bag-big" data-action="openLock"><i class="fa-solid fa-lock"></i> <span>{{localize "CLOOT.Box.OpenLock"}}</span></button></div>
     {{else if state.locked}}
       <p class="bag-notice">{{localize "CLOOT.WaitForGM"}}</p>
     {{else}}
