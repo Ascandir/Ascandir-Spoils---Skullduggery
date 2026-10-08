@@ -426,3 +426,19 @@
 .cl-lockwin .cl-lockpanel { position: relative; z-index: 2; margin: 0 22px 22px; padding: 70px 1.1rem 1rem; border-radius: 12px; background: linear-gradient(180deg, rgba(8,9,12,.72), rgba(16,18,24,.82)); box-shadow: inset 0 3px 12px #000, 0 1px 0 rgba(255,255,255,.15); border: 1px solid #14161b; }
 .cl-lockwin .bag-head { text-align: center; }
 .cl-lockwin .bag-title h2 { color: #ecd9a0; }
+
+/* ---------- Ascandir-Menü und Thievery-Fenster: Feinschliff ---------- */
+.application.cl-dialog .window-header { min-height: 2.4rem; align-items: center; gap: 0.5rem; padding: 0 0.6rem; }
+.application.cl-dialog .window-header > i, .application.cl-dialog .window-header .window-icon { color: #e1b963; font-size: 1rem; margin: 0; }
+.application.cl-dialog .window-title { flex: 1; min-width: 0; margin: 0; font-size: 1.05rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8); }
+.application.cl-menu .window-content { padding: 1rem 1.2rem 0.4rem; text-align: center; }
+.application.cl-menu .window-content p { margin: 0; font-size: 1.05rem; }
+.application.cl-menu footer.form-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; padding: 0.8rem 1.2rem 1.2rem; }
+.application.cl-menu footer.form-footer button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; height: auto; min-height: 4.6rem; padding: 0.6rem 0.4rem; margin: 0; font: 600 1.05rem/1.2 "CL Title", "Cinzel", serif; letter-spacing: 0.04em; white-space: normal; }
+.application.cl-menu footer.form-footer button i { font-size: 1.7rem; color: #e1b963; margin: 0; }
+.application.cl-menu footer.form-footer button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; filter: grayscale(0.6); }
+.application.cl-menu footer.form-footer button:disabled:hover { color: inherit; border-color: inherit; box-shadow: none; }
+.cl-thievery .window-header { min-height: 2.4rem; }
+.cl-thievery .window-content { padding: 1rem 1.2rem 1.2rem; gap: 0.6rem; }
+.cl-thievery .form-group { margin: 0 0 0.6rem; }
+.cl-thievery .form-group > label { font: 600 0.9rem "CL Title", "Cinzel", serif; letter-spacing: 0.06em; color: #e1b963; }

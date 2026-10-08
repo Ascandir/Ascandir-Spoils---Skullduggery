@@ -270,38 +270,24 @@ export async function openAscandirMenu(doc) {
     if (!actor) return;
     const base = actor.isToken ? actor.baseActor : actor;
 
-    // Welche Token gehören dazu?
-    let tokens = [];
-    if (isTokenDoc) tokens = [doc];
-    else if (actor.isToken && actor.token) tokens = [actor.token];
-    else tokens = (actor.getActiveTokens?.(false, true) ?? []).slice(0, 6);
-
-    const buttons = [];
-    if (base?.type === "npc") buttons.push({ action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice" });
-    for (const td of tokens) {
-      buttons.push({
-        action: `thief:${td.uuid}`,
-        label: tokens.length > 1 ? `${t("CLOOT.Menu.Thievery")}: ${td.name}` : t("CLOOT.Menu.Thievery"),
-        icon: "fa-solid fa-hand-holding"
-      });
-    }
-    if (!isTokenDoc && !actor.isToken) buttons.push({ action: "proto", label: t("CLOOT.Menu.ThieveryProto"), icon: "fa-solid fa-hand-holding" });
-    buttons.push({ action: "cancel", label: t("CLOOT.Door.Cancel"), icon: "fa-solid fa-xmark" });
+    // Token-Konfiguration / Token-Actor: Einstellungen gelten für diesen Token. Actor-Bogen: für die Vorlage (neue Token).
+    const target = isTokenDoc ? doc : actor.isToken && actor.token ? actor.token : base;
+    const buttons = [
+      { action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice", disabled: base?.type !== "npc" },
+      { action: "thief", label: t("CLOOT.Menu.Thievery"), icon: "fa-solid fa-hand-holding" }
+    ];
 
     const choice = await foundry.applications.api.DialogV2.wait({
-      classes: ["cl-dialog"],
+      classes: ["cl-dialog", "cl-menu"],
+      position: { width: 440 },
       window: { title: t("CLOOT.Menu.Title"), icon: "fa-solid fa-skull" },
       content: `<p>${t("CLOOT.Menu.Intro", { name: foundry.utils.escapeHTML(actor.name) })}</p>`,
       buttons,
       rejectClose: false
     });
-    if (!choice || choice === "cancel") return;
+    if (!choice) return;
     if (choice === "table") return editTable(base);
-    if (choice === "proto") return editThievery(base);
-    if (choice.startsWith("thief:")) {
-      const td = tokens.find((x) => x.uuid === choice.slice(6));
-      if (td) return editThievery(td);
-    }
+    if (choice === "thief") return editThievery(target);
   } catch (err) {
     reportError(err);
   }
