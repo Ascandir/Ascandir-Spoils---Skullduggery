@@ -15,6 +15,7 @@
     <div class="bag-foot"><button type="button" class="bag-btn" data-action="refresh"><i class="fa-solid fa-rotate"></i> {{localize "CLOOT.Refresh"}}</button></div>
   {{else}}
     <header class="bag-head">
+      {{#if state.isGM}}
       <div class="bag-title">
         <h2>{{state.name}}</h2>
         <p class="bag-sub">
@@ -25,6 +26,7 @@
           {{#if state.alive}} · <i class="fa-solid fa-heart-pulse"></i> {{localize "CLOOT.Alive"}}{{/if}}
         </p>
       </div>
+      {{/if}}
       <div class="bag-tools">
         <button type="button" class="bag-ibtn" data-action="refresh" data-tooltip="CLOOT.Refresh"><i class="fa-solid fa-rotate"></i></button>
         {{#if state.isGM}}

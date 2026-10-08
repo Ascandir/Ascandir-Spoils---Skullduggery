@@ -50,6 +50,7 @@ export class LootApp extends Base {
 
   /** @override */
   get title() {
+    if (!game.user.isGM) return game.i18n.localize("CLOOT.TitlePlayer");
     return game.i18n.format("CLOOT.Title", { name: this.lootState?.name ?? "" });
   }
 
@@ -67,7 +68,8 @@ export class LootApp extends Base {
 
   /** Alles, was der Beutel zusätzlich braucht: Bilder, Medaille (Symbol des Kreaturentyps), Münzen mit Namen. */
   bagContext(state) {
-    const typeKey = String(state?.creatureType ?? "").toLowerCase();
+    // Spieler sehen weder Name noch Kreaturentyp, das verrät sonst, wen sie gerade bestehlen
+    const typeKey = game.user.isGM ? String(state?.creatureType ?? "").toLowerCase() : "";
     const fromConfig = typeKey ? CONFIG.DND5E?.creatureTypes?.[typeKey]?.label : null;
     return {
       assets: `modules/${MODULE_ID}/assets`,

@@ -485,3 +485,5 @@
 .cl-chest .cl-bag-art { filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.65)); }
 .cl-bag-on.cl-chest .bag-panel { margin: -6px; padding: 38px 1rem 0.9rem; border-radius: 8px; background-size: auto, 256px 256px; box-shadow: inset 0 0 36px 4px rgba(0, 0, 0, 0.8), inset 0 3px 10px #000; border: 1px solid #1a1008; }
 .cl-chest .bag-head { padding-top: 0.2rem; }
+
+.bag-tools { margin-left: auto; }

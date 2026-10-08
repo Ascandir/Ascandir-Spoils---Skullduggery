@@ -262,5 +262,6 @@
   "CLOOT.Chat.BoxPickFail": "{who} scheitert am Schloss von „{target}“.",
   "CLOOT.Container.Style": "Aussehen",
   "CLOOT.Container.StyleChest": "Truhe",
-  "CLOOT.Container.StyleSack": "Sack"
+  "CLOOT.Container.StyleSack": "Sack",
+  "CLOOT.TitlePlayer": "Beute"
 }
