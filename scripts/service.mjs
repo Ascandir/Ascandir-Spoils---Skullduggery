@@ -77,8 +77,8 @@ export function initSocket() {
         try {
           result = user ? await gmHandle(user, msg.op, msg.payload ?? {}) : fail("CLOOT.Err.Internal");
         } catch (err) {
-          console.error(`${MODULE_ID} | Fehler beim Verarbeiten`, err);
-          result = fail("CLOOT.Err.Internal");
+          console.error(`${MODULE_ID} | Fehler beim Verarbeiten (${msg.op})`, err);
+          result = fail("CLOOT.Err.Crash", { msg: `${msg.op}: ${err?.message ?? String(err)}` });
         }
         game.socket.emit(SOCKET, { kind: "response", reqId: msg.reqId, userId: msg.userId, result });
         break;
