@@ -292,7 +292,7 @@ function buildState(ctx) {
     : [];
   const items = hide
     ? []
-    : ctx.actor.items.filter(isLootableItem).map((i) => {
+    : ctx.actor.items.filter((i) => isLootableItem(i, { nested: ctx.alive })).map((i) => {
         const can = mayTakeItem(ctx, i);
         return {
           ...buildItemView(i, { isGM: ctx.isGM }),
@@ -817,6 +817,8 @@ async function pickResolve(ctx, p) {
     });
   }
   changed(ctx.corpse.uuid);
+  // Erfolg: Das Beute-Fenster öffnet sich direkt bei der Spielleitung, dort werden die Gegenstände freigegeben.
+  if (success && game.user.isGM) game.modules.get(MODULE_ID)?.api?.openLoot?.(ctx.corpse, null);
   return { ok: true, success, state: buildState(ctx) };
 }
 

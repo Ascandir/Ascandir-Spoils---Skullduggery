@@ -16,9 +16,9 @@ export const COINS = ["pp", "gp", "ep", "sp", "cp"];
  * - keine natürlichen Waffen/Rüstungen (Biss, Klauen, natürliche Rüstung)
  * - Inhalte von Behältern erscheinen nicht einzeln, sondern wandern mit dem Behälter
  */
-export function isLootableItem(item) {
+export function isLootableItem(item, { nested = false } = {}) {
   if (!item || !LOOT_TYPES.includes(item.type)) return false;
-  if (item.system?.container) return false;
+  if (item.system?.container && !nested) return false;
   const sub = item.system?.type?.value;
   if ((item.type === "weapon" || item.type === "equipment") && sub === "natural") return false;
   return true;
