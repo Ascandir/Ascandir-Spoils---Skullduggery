@@ -1,0 +1,42 @@
+{
+  "id": "corpse-loot",
+  "title": "Corpse Loot by Ascandir",
+  "description": "Tote NSCs (Totenkopf-Status) lassen sich im Umkreis plündern: Übersicht über Inventar und Münzen, einzeln oder komplett nehmen, direkt ins Gruppeninventar schicken, optional mit Freigabe durch die Spielleitung.",
+  "version": "0.14.1",
+  "authors": [
+    {
+      "name": "Ascandir"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14.365"
+  },
+  "relationships": {
+    "requires": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.2.0"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "languages": [
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": true
+}

@@ -1,0 +1,249 @@
+<div class="clt-root">
+<div class="clt-shell">
+  <nav class="clt-nav">
+    <button type="button" class="clt-nav-btn {{#if isTable}}active{{/if}}" data-action="showPage" data-page="table" data-tooltip="CLOOT.Cfg.Loottable"><i class="fa-solid fa-sack-dollar"></i><span>{{localize "CLOOT.Cfg.Loottable"}}</span></button>
+    <button type="button" class="clt-nav-btn {{#if isHarvest}}active{{/if}}" data-action="showPage" data-page="harvest" data-tooltip="CLOOT.Cfg.Harvest"><i class="fa-solid fa-drumstick-bite"></i><span>{{localize "CLOOT.Cfg.Harvest"}}</span></button>
+    <button type="button" class="clt-nav-btn {{#if isPreview}}active{{/if}}" data-action="showPage" data-page="preview" data-tooltip="CLOOT.Cfg.Preview"><i class="fa-solid fa-dice"></i><span>{{localize "CLOOT.Cfg.Preview"}}</span></button>
+  </nav>
+
+  <div class="clt-content">
+    <header class="clt-banner {{#if isHarvest}}clt-banner-harvest{{/if}}" style="background-image: url('{{assets}}/{{banner}}')">
+      <div class="clt-banner-text">
+        <h1>{{#if isHarvest}}{{localize "CLOOT.Cfg.Harvest"}}{{else}}{{localize "CLOOT.Cfg.Loottable"}}{{/if}}</h1>
+        <p>{{localize "CLOOT.Cfg.Config"}} · {{name}}</p>
+      </div>
+      {{#if isTable}}
+      <label class="clt-switch clt-banner-switch">
+        <input type="checkbox" name="enabled" {{#if table.enabled}}checked{{/if}}>
+        <span class="clt-switch-ui"></span>
+        <span>{{localize "CLOOT.Table.Enabled"}}</span>
+      </label>
+      {{/if}}
+    </header>
+
+    <div class="clt-scroll">
+    {{#if isTable}}
+      <section class="clt-panel">
+        <header class="clt-panel-head">
+          <img class="clt-head-icon" src="{{assets}}/coin-gp.svg" alt="">
+          <h2>{{localize "CLOOT.Cfg.Currency"}}</h2>
+          <span class="clt-help" data-tooltip="CLOOT.Cfg.CoinHelp"><i class="fa-regular fa-circle-question"></i></span>
+        </header>
+        <div class="clt-currency">
+          {{#each coins}}
+          <div class="clt-coincell">
+            <img src="{{../assets}}/coin-{{key}}.svg" alt="">
+            <div class="clt-coinfields">
+              <span class="clt-coinname">{{label}}</span>
+              <div class="clt-range">
+                <input type="number" min="0" name="coins.{{key}}.min" value="{{min}}" placeholder="0" aria-label="{{localize 'CLOOT.Table.Min'}}">
+                <i>–</i>
+                <input type="number" min="0" name="coins.{{key}}.max" value="{{max}}" placeholder="0" aria-label="{{localize 'CLOOT.Table.Max'}}">
+              </div>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="clt-panel">
+        <header class="clt-panel-head">
+          <i class="fa-solid fa-bullseye clt-head-fa"></i>
+          <h2>{{localize "CLOOT.Cfg.Ammo"}}</h2>
+          <span class="clt-help" data-tooltip="CLOOT.Cfg.AmmoHelp"><i class="fa-regular fa-circle-question"></i></span>
+          <span class="clt-head-hint">{{localize "CLOOT.Cfg.AmmoHint"}}</span>
+        </header>
+        <div class="clt-tiles" data-drop-kind="range">
+          {{#each rangeRows}}
+          <div class="clt-tile2">
+            <input type="hidden" name="items.{{idx}}.uuid" value="{{uuid}}">
+            <input type="hidden" name="items.{{idx}}.name" value="{{name}}">
+            <input type="hidden" name="items.{{idx}}.img" value="{{img}}">
+            <input type="hidden" name="items.{{idx}}.kind" value="range">
+            <button type="button" class="clt-x" data-action="remove" data-idx="{{idx}}" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-xmark"></i></button>
+            <img class="clt-tile-img" src="{{img}}" alt="">
+            <strong class="clt-tile-name" title="{{name}}">{{name}}</strong>
+            <div class="clt-tile-fields">
+              <label class="clt-mini"><span>{{localize "CLOOT.Table.Amount"}}</span>
+                <div class="clt-range">
+                  <input type="number" min="0" name="items.{{idx}}.min" value="{{min}}" aria-label="{{localize 'CLOOT.Table.Min'}}">
+                  <i>–</i>
+                  <input type="number" min="0" name="items.{{idx}}.max" value="{{max}}" aria-label="{{localize 'CLOOT.Table.Max'}}">
+                </div>
+              </label>
+            </div>
+          </div>
+          {{/each}}
+          <div class="clt-addtile"><i class="fa-solid fa-plus"></i><span>{{localize "CLOOT.Cfg.DropHere"}}</span></div>
+        </div>
+      </section>
+
+      <section class="clt-panel">
+        <header class="clt-panel-head">
+          <i class="fa-solid fa-sack-dollar clt-head-fa"></i>
+          <h2>{{localize "CLOOT.Cfg.Extra"}}</h2>
+          <span class="clt-help" data-tooltip="CLOOT.Cfg.ExtraHelp"><i class="fa-regular fa-circle-question"></i></span>
+          <span class="clt-head-hint">{{localize "CLOOT.Cfg.ExtraHint"}}</span>
+        </header>
+        <div class="clt-tiles" data-drop-kind="special">
+          {{#each specialRows}}
+          <div class="clt-tile2">
+            <input type="hidden" name="items.{{idx}}.uuid" value="{{uuid}}">
+            <input type="hidden" name="items.{{idx}}.name" value="{{name}}">
+            <input type="hidden" name="items.{{idx}}.img" value="{{img}}">
+            <input type="hidden" name="items.{{idx}}.kind" value="special">
+            <button type="button" class="clt-x" data-action="remove" data-idx="{{idx}}" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-xmark"></i></button>
+            <img class="clt-tile-img" src="{{img}}" alt="">
+            <strong class="clt-tile-name" title="{{name}}">{{name}}</strong>
+            <div class="clt-tile-fields">
+              <label class="clt-mini"><span>{{localize "CLOOT.Table.Chance"}}</span>
+                <div class="clt-range clt-single">
+                  <input type="number" min="0" max="100" name="items.{{idx}}.chance" value="{{chance}}" aria-label="{{localize 'CLOOT.Table.Chance'}}">
+                  <i>%</i>
+                </div>
+              </label>
+              <label class="clt-mini"><span>{{localize "CLOOT.Table.Amount"}}</span>
+                <div class="clt-range">
+                  <input type="number" min="0" name="items.{{idx}}.min" value="{{min}}" aria-label="{{localize 'CLOOT.Table.Min'}}">
+                  <i>–</i>
+                  <input type="number" min="0" name="items.{{idx}}.max" value="{{max}}" aria-label="{{localize 'CLOOT.Table.Max'}}">
+                </div>
+              </label>
+            </div>
+          </div>
+          {{/each}}
+          <div class="clt-addtile"><i class="fa-solid fa-plus"></i><span>{{localize "CLOOT.Cfg.DropHere"}}</span></div>
+        </div>
+      </section>
+
+    {{else if isHarvest}}
+      <p class="clt-intro">{{localize "CLOOT.Harvest.Intro"}}</p>
+
+      {{#each entries}}
+      <section class="clt-panel clh-panel">
+        <input type="hidden" name="entries.{{idx}}.id" value="{{id}}">
+        <header class="clt-panel-head">
+          <i class="fa-solid fa-drumstick-bite clt-head-fa"></i>
+          <input type="text" class="clh-title" name="entries.{{idx}}.label" value="{{label}}" aria-label="{{localize 'CLOOT.Harvest.Label'}}">
+          <button type="button" class="clt-x clt-x-static" data-action="removeEntry" data-idx="{{idx}}" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-trash"></i></button>
+        </header>
+
+        <div class="clh-body">
+          <div class="clh-grid">
+            <label class="clt-mini clt-grow"><span>{{localize "CLOOT.Harvest.Skill"}}</span>
+              <select name="entries.{{idx}}.skill">
+                {{#each skills}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+            </label>
+            <label class="clt-mini"><span>{{localize "CLOOT.Harvest.DC"}}</span>
+              <div class="clt-range clt-single"><input type="number" min="0" name="entries.{{idx}}.dc" value="{{dc}}"></div>
+            </label>
+            <label class="clt-switch clt-switch-field">
+              <input type="checkbox" name="entries.{{idx}}.oneTry" {{#if oneTry}}checked{{/if}}>
+              <span class="clt-switch-ui"></span>
+              <span>{{localize "CLOOT.Harvest.OneTry"}}</span>
+            </label>
+          </div>
+
+          <div class="clh-tool">
+            <div class="clh-tool-top">
+              <label class="clt-switch">
+                <input type="checkbox" name="entries.{{idx}}.needTool" {{#if needTool}}checked{{/if}}>
+                <span class="clt-switch-ui"></span>
+                <span>{{localize "CLOOT.Harvest.NeedTool"}}</span>
+              </label>
+              <input type="text" class="clh-toolname" name="entries.{{idx}}.toolName" value="{{toolName}}" placeholder="{{localize 'CLOOT.Harvest.ToolName'}}">
+            </div>
+            <div class="clh-tool-opts">
+              <label class="clt-switch">
+                <input type="checkbox" name="entries.{{idx}}.consumeTool" {{#if consumeTool}}checked{{/if}}>
+                <span class="clt-switch-ui"></span>
+                <span>{{localize "CLOOT.Harvest.Consume"}}</span>
+              </label>
+              <select class="clh-consume-on" name="entries.{{idx}}.consumeOn" aria-label="{{localize 'CLOOT.Harvest.ConsumeOn'}}">
+                <option value="success" {{#if consumeOnSuccess}}selected{{/if}}>{{localize "CLOOT.Harvest.OnSuccess"}}</option>
+                <option value="attempt" {{#unless consumeOnSuccess}}selected{{/unless}}>{{localize "CLOOT.Harvest.OnAttempt"}}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="clt-tiles" data-entry="{{idx}}">
+            {{#each items}}
+            <div class="clt-tile2">
+              <input type="hidden" name="entries.{{../idx}}.items.{{j}}.uuid" value="{{uuid}}">
+              <input type="hidden" name="entries.{{../idx}}.items.{{j}}.name" value="{{name}}">
+              <input type="hidden" name="entries.{{../idx}}.items.{{j}}.img" value="{{img}}">
+              <button type="button" class="clt-x" data-action="removeItem" data-idx="{{../idx}}" data-j="{{j}}" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-xmark"></i></button>
+              <img class="clt-tile-img" src="{{img}}" alt="">
+              <strong class="clt-tile-name" title="{{name}}">{{name}}</strong>
+              <div class="clt-tile-fields">
+                <label class="clt-mini"><span>{{localize "CLOOT.Table.Amount"}}</span>
+                  <div class="clt-range">
+                    <input type="number" min="0" name="entries.{{../idx}}.items.{{j}}.min" value="{{min}}" aria-label="{{localize 'CLOOT.Table.Min'}}">
+                    <i>–</i>
+                    <input type="number" min="0" name="entries.{{../idx}}.items.{{j}}.max" value="{{max}}" aria-label="{{localize 'CLOOT.Table.Max'}}">
+                  </div>
+                </label>
+              </div>
+            </div>
+            {{/each}}
+            <div class="clt-addtile"><i class="fa-solid fa-plus"></i><span>{{localize "CLOOT.Harvest.DropItem"}}</span></div>
+          </div>
+        </div>
+      </section>
+      {{/each}}
+
+      {{#unless hasEntries}}<p class="clt-empty">{{localize "CLOOT.Harvest.None"}}</p>{{/unless}}
+
+    {{else}}
+      <section class="clt-panel">
+        <header class="clt-panel-head">
+          <i class="fa-solid fa-dice clt-head-fa"></i>
+          <h2>{{localize "CLOOT.Cfg.Preview"}}</h2>
+          <span class="clt-head-hint">{{localize "CLOOT.Cfg.PreviewHint"}}</span>
+        </header>
+        {{#if preview}}
+          {{#if preview.coins.length}}
+          <div class="clt-currency clt-preview-coins">
+            {{#each preview.coins}}
+            <div class="clt-coincell"><img src="{{../assets}}/coin-{{key}}.svg" alt=""><div class="clt-coinfields"><span class="clt-coinname">{{label}}</span><strong class="clt-big">{{value}}</strong></div></div>
+            {{/each}}
+          </div>
+          {{/if}}
+          {{#if preview.items.length}}
+          <div class="clt-tiles clt-preview-items">
+            {{#each preview.items}}
+            <div class="clt-tile2 clt-ptile"><img class="clt-tile-img" src="{{img}}" alt=""><strong class="clt-tile-name" title="{{name}}">{{name}}</strong><span class="clt-pqty">× {{qty}}</span></div>
+            {{/each}}
+          </div>
+          {{/if}}
+          {{#if preview.empty}}<p class="clt-empty">{{localize "CLOOT.Cfg.PreviewNothing"}}</p>{{/if}}
+        {{else}}
+          <p class="clt-empty">{{localize "CLOOT.Cfg.PreviewEmpty"}}</p>
+        {{/if}}
+      </section>
+    {{/if}}
+    </div>
+
+    <footer class="clt-actions">
+      {{#if isHarvest}}
+      <button type="button" class="clt-test" data-action="addEntry">
+        <i class="fa-solid fa-plus"></i>
+        <span><strong>{{localize "CLOOT.Harvest.Add"}}</strong><small>{{localize "CLOOT.Cfg.AddStepHint"}}</small></span>
+      </button>
+      <button type="button" class="clt-save" data-action="save"><i class="fa-solid fa-floppy-disk"></i> <span>{{localize "CLOOT.Cfg.SaveHarvest"}}</span></button>
+      {{else}}
+      <button type="button" class="clt-test" data-action="preview">
+        <i class="fa-solid fa-dice"></i>
+        <span><strong>{{localize "CLOOT.Cfg.Test"}}</strong><small>{{localize "CLOOT.Cfg.TestHint"}}</small></span>
+      </button>
+      {{#if isTable}}
+      <button type="button" class="clt-save" data-action="save"><i class="fa-solid fa-floppy-disk"></i> <span>{{localize "CLOOT.Cfg.Save"}}</span></button>
+      {{else}}
+      <button type="button" class="clt-save" data-action="showPage" data-page="table"><i class="fa-solid fa-pen"></i> <span>{{localize "CLOOT.Cfg.BackToEdit"}}</span></button>
+      {{/if}}
+      {{/if}}
+    </footer>
+  </div>
+</div>
+</div>

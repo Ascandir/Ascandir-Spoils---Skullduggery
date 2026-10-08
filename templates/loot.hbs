@@ -1,0 +1,119 @@
+<div class="cl-bag {{#if bagOn}}cl-bag-on{{/if}}">
+  {{#if bagOn}}
+  <div class="cl-bag-art" style="border-image-source: url('{{assets}}/bag/body.webp')"></div>
+  {{#if typeKey}}<img class="cl-medal" src="{{assets}}/types/{{typeKey}}.webp" alt="{{typeLabel}}" data-tooltip="{{typeLabel}}">{{else}}<span class="cl-medal cl-medal-plain"><i class="fa-solid fa-sack-dollar"></i></span>{{/if}}
+  <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
+  {{/if}}
+
+  <section class="corpse-loot-body bag-panel" {{#if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
+  {{#if error}}
+    <p class="bag-notice">{{error}}</p>
+    <div class="bag-foot"><button type="button" class="bag-btn" data-action="refresh"><i class="fa-solid fa-rotate"></i> {{localize "CLOOT.Refresh"}}</button></div>
+  {{else}}
+    <header class="bag-head">
+      <div class="bag-title">
+        <h2>{{state.name}}</h2>
+        <p class="bag-sub">
+          {{#if typeLabel}}<i class="fa-solid {{typeIcon}}"></i> {{typeLabel}} ·{{/if}}
+          {{#if state.released}}<i class="fa-solid fa-lock-open"></i> {{localize "CLOOT.Released"}}
+          {{else if state.requireRelease}}<i class="fa-solid fa-lock"></i> {{localize "CLOOT.Locked"}}
+          {{else}}<i class="fa-solid fa-lock-open"></i> {{localize "CLOOT.Open"}}{{/if}}
+          {{#if state.alive}} · <i class="fa-solid fa-heart-pulse"></i> {{localize "CLOOT.Alive"}}{{/if}}
+        </p>
+      </div>
+      <div class="bag-tools">
+        <button type="button" class="bag-ibtn" data-action="refresh" data-tooltip="CLOOT.Refresh"><i class="fa-solid fa-rotate"></i></button>
+        {{#if state.isGM}}
+          <button type="button" class="bag-ibtn" data-action="openTable" data-tooltip="CLOOT.Table.Open"><i class="fa-solid fa-dice"></i></button>
+          {{#if state.canRoll}}
+          <button type="button" class="bag-btn" data-action="roll" data-tooltip="CLOOT.RollHint">
+            <i class="fa-solid fa-dice-d20"></i> {{#if state.rolled}}{{localize "CLOOT.Reroll"}}{{else}}{{localize "CLOOT.Roll"}}{{/if}}
+          </button>
+          {{/if}}
+          {{#if state.requireRelease}}
+          <button type="button" class="bag-btn" data-action="release">
+            {{#if state.released}}<i class="fa-solid fa-lock"></i> {{localize "CLOOT.Lock"}}{{else}}<i class="fa-solid fa-unlock"></i> {{localize "CLOOT.Release"}}{{/if}}
+          </button>
+          {{/if}}
+        {{/if}}
+      </div>
+    </header>
+
+    {{#if state.locked}}
+      <p class="bag-notice">{{localize "CLOOT.WaitForGM"}}</p>
+    {{else}}
+      {{#if state.hasCoins}}
+      <div class="bag-coins">
+        {{#each coinList}}
+        <div class="bag-coin"><img src="{{../assets}}/coin-{{key}}.svg" alt=""><span><strong>{{value}}</strong> {{label}}</span></div>
+        {{/each}}
+        {{#if state.canTake}}
+        <div class="bag-coin-actions">
+          <button type="button" class="bag-btn" data-action="coins" data-to="self"><i class="fa-solid fa-hand"></i> {{localize "CLOOT.Take"}}</button>
+          {{#if state.group}}<button type="button" class="bag-btn" data-action="coins" data-to="group" data-tooltip="{{state.group.name}}"><i class="fa-solid fa-people-group"></i> {{localize "CLOOT.ToGroup"}}</button>{{/if}}
+        </div>
+        {{/if}}
+      </div>
+      {{/if}}
+
+      {{#if state.hasHarvest}}
+      <ul class="bag-rows">
+        <li class="bag-label">{{localize "CLOOT.Harvest.Section"}}</li>
+        {{#each state.harvest}}
+        <li class="bag-row bag-task">
+          <span class="bag-ico bag-ico-fa">
+            {{#if isDone}}<i class="fa-solid fa-check"></i>{{else if isFailed}}<i class="fa-solid fa-xmark"></i>{{else}}<i class="fa-solid fa-lock"></i>{{/if}}
+          </span>
+          <span class="bag-name">
+            {{label}}
+            <small>{{skillLabel}}{{#if isGM}} · SG {{dc}}{{/if}}{{#if needTool}} · {{localize "CLOOT.Harvest.Tool"}}: {{toolName}}{{#if consumeTool}} ({{localize "CLOOT.Harvest.Consumed"}}){{/if}}{{/if}}</small>
+          </span>
+          <span class="bag-actions">
+            {{#if canTry}}<button type="button" class="bag-btn" data-action="harvest" data-entry="{{id}}"><i class="fa-solid fa-dice-d20"></i> {{localize "CLOOT.Harvest.Roll"}}</button>{{/if}}
+            {{#if isDone}}<span class="bag-badge">{{localize "CLOOT.Harvest.Done"}}</span>{{/if}}
+            {{#if isFailed}}<span class="bag-badge">{{localize "CLOOT.Harvest.Failed"}}</span>{{/if}}
+            {{#if isGM}}{{#unless isDone}}<button type="button" class="bag-ibtn" data-action="unlock" data-entry="{{id}}" data-tooltip="CLOOT.Harvest.Unlock"><i class="fa-solid fa-unlock"></i></button>{{/unless}}{{/if}}
+          </span>
+        </li>
+        {{/each}}
+      </ul>
+      {{/if}}
+
+      <ul class="bag-rows {{#if state.isGM}}bag-droppable{{/if}}" {{#if state.isGM}}data-gm-drop{{/if}}>
+        {{#each state.items}}
+        <li class="bag-row bag-item" data-item-id="{{id}}">
+          <span class="bag-ico"><img src="{{img}}" alt=""></span>
+          <span class="bag-name" title="{{name}}">{{name}}{{#if multi}} <em>(x{{qty}})</em>{{/if}}</span>
+          <span class="bag-col">{{weight}}</span>
+          <span class="bag-col">{{price}}</span>
+          <span class="bag-actions">
+            {{#if canTake}}
+              {{#if multi}}<input type="number" data-role="qty" min="1" max="{{qty}}" value="{{qty}}" aria-label="{{localize 'CLOOT.Table.Amount'}}">{{/if}}
+              <button type="button" class="bag-ibtn" data-action="take" data-to="self" data-tooltip="CLOOT.Take"><i class="fa-solid fa-hand"></i></button>
+              {{#if canGroup}}<button type="button" class="bag-ibtn" data-action="take" data-to="group" data-tooltip="CLOOT.ToGroup"><i class="fa-solid fa-people-group"></i></button>{{/if}}
+            {{/if}}
+            {{#if canManage}}<button type="button" class="bag-ibtn bag-danger" data-action="gmRemove" data-tooltip="CLOOT.Table.Remove"><i class="fa-solid fa-trash"></i></button>{{/if}}
+          </span>
+        </li>
+        {{/each}}
+        {{#if state.isGM}}
+        <li class="bag-row bag-add"><span class="bag-ico bag-ico-fa"><i class="fa-solid fa-plus"></i></span><span class="bag-name">{{localize "CLOOT.GMDrop"}}</span></li>
+        {{else unless state.items.length}}
+        <li class="bag-row bag-add"><span class="bag-name">{{localize "CLOOT.NoItems"}}</span></li>
+        {{/if}}
+      </ul>
+
+      {{#if state.canTake}}
+      {{#unless state.isEmpty}}
+      <div class="bag-foot">
+        <button type="button" class="bag-big" data-action="all" data-to="self"><i class="fa-solid fa-hand"></i> <span>{{localize "CLOOT.TakeAll"}}</span></button>
+        {{#if state.group}}<button type="button" class="bag-big" data-action="all" data-to="group"><i class="fa-solid fa-people-group"></i> <span>{{localize "CLOOT.AllToGroup"}}</span></button>{{/if}}
+      </div>
+      {{/unless}}
+      {{else if state.isGM}}
+      <p class="bag-hint">{{localize "CLOOT.GMHint"}}</p>
+      {{/if}}
+    {{/if}}
+  {{/if}}
+  </section>
+</div>
