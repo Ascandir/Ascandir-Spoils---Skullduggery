@@ -1,4 +1,4 @@
-# Ascandir – Spoils & Skullduggery v0.20.4
+# Ascandir – Spoils & Skullduggery v0.20.5
 
 Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
