@@ -120,6 +120,11 @@ export async function request(op, payload) {
   });
 }
 
+/** Für andere Module dieses Pakets: offenen Fenstern dieses Tokens Bescheid geben. */
+export function notifyChanged(tokenUuid) {
+  changed(tokenUuid);
+}
+
 function changed(tokenUuid) {
   game.socket.emit(SOCKET, { kind: "changed", tokenUuid });
   refreshApps(tokenUuid);

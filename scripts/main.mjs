@@ -136,7 +136,7 @@ Hooks.once("setup", () => {
 Hooks.once("ready", () => {
   Service.initSocket();
   applyAccent();
-  game.modules.get(MODULE_ID).api = { lootNearby, openLoot, editTable, editHarvest, rollLoot: rollSelected };
+  game.modules.get(MODULE_ID).api = { lootNearby, openLoot, editTable, editHarvest, editThievery, rollLoot: rollSelected };
 });
 
 function applyAccent() {
@@ -245,6 +245,68 @@ export async function editTable(actorOrName, tab = "table") {
 /** Wie editTable, aber direkt auf der Ernte-Seite (für Makros). */
 export const editHarvest = (actorOrName) => editTable(actorOrName, "harvest");
 
+/** Öffnet die Taschendiebstahl-Einstellungen (Spielleitung): für einen Token oder, ohne Token, für die Vorlage des Actors. */
+export async function editThievery(tokenOrActor) {
+  try {
+    if (!game.user.isGM) return;
+    const isToken = tokenOrActor?.documentName === "Token";
+    const { openThievery } = await import("./thievery-app.mjs");
+    await openThievery(isToken ? { token: tokenOrActor, actor: tokenOrActor.actor ?? tokenOrActor.baseActor } : { actor: tokenOrActor });
+  } catch (err) {
+    reportError(err);
+  }
+}
+
+/**
+ * Menüpunkt „Ascandir“ unter den drei Punkten von Charakterbögen und Token-Einstellungen.
+ * Darunter: Loottable (nur bei NSC-Actors) und Thievery (bei allen).
+ * @param {Actor|TokenDocument} doc
+ */
+export async function openAscandirMenu(doc) {
+  try {
+    if (!game.user.isGM) return;
+    const isTokenDoc = doc?.documentName === "Token";
+    const actor = isTokenDoc ? doc.actor ?? doc.baseActor : doc;
+    if (!actor) return;
+    const base = actor.isToken ? actor.baseActor : actor;
+
+    // Welche Token gehören dazu?
+    let tokens = [];
+    if (isTokenDoc) tokens = [doc];
+    else if (actor.isToken && actor.token) tokens = [actor.token];
+    else tokens = (actor.getActiveTokens?.(false, true) ?? []).slice(0, 6);
+
+    const buttons = [];
+    if (base?.type === "npc") buttons.push({ action: "table", label: t("CLOOT.Menu.Loottable"), icon: "fa-solid fa-dice" });
+    for (const td of tokens) {
+      buttons.push({
+        action: `thief:${td.uuid}`,
+        label: tokens.length > 1 ? `${t("CLOOT.Menu.Thievery")}: ${td.name}` : t("CLOOT.Menu.Thievery"),
+        icon: "fa-solid fa-hand-holding"
+      });
+    }
+    if (!isTokenDoc && !actor.isToken) buttons.push({ action: "proto", label: t("CLOOT.Menu.ThieveryProto"), icon: "fa-solid fa-hand-holding" });
+    buttons.push({ action: "cancel", label: t("CLOOT.Door.Cancel"), icon: "fa-solid fa-xmark" });
+
+    const choice = await foundry.applications.api.DialogV2.wait({
+      classes: ["cl-dialog"],
+      window: { title: t("CLOOT.Menu.Title"), icon: "fa-solid fa-skull" },
+      content: `<p>${t("CLOOT.Menu.Intro", { name: foundry.utils.escapeHTML(actor.name) })}</p>`,
+      buttons,
+      rejectClose: false
+    });
+    if (!choice || choice === "cancel") return;
+    if (choice === "table") return editTable(base);
+    if (choice === "proto") return editThievery(base);
+    if (choice.startsWith("thief:")) {
+      const td = tokens.find((x) => x.uuid === choice.slice(6));
+      if (td) return editThievery(td);
+    }
+  } catch (err) {
+    reportError(err);
+  }
+}
+
 /** Würfelt die Beute für alle ausgewählten Token neu (Makro: game.modules.get("corpse-loot").api.rollLoot()). */
 export async function rollSelected() {
   try {
@@ -329,10 +391,12 @@ Hooks.on("renderTokenHUD", (hud, html) => {
 
     const buttons = [];
     const showLoot = game.settings.get(MODULE_ID, "showHud");
-    if (game.user.isGM && td.actor?.type === "npc") {
-      // Spielleitung: Beute-Fenster auch für lebende NSC (z. B. um einem Token vorab etwas zu geben)
-      if (showLoot) buttons.push({ icon: "fa-sack-dollar", tip: "CLOOT.Keybind.Loot", run: () => openLoot(td, null) });
-      buttons.push({ icon: "fa-dice", tip: "CLOOT.Table.Open", run: () => editTable(td.baseActor ?? td.actor) });
+    if (game.user.isGM && td.actor) {
+      const type = td.actor.type;
+      // Spielleitung: Beute-Fenster auch für lebende Token (z. B. um vorab etwas zu geben oder einen Diebstahl zu prüfen)
+      if (showLoot && (type === "npc" || type === "character")) buttons.push({ icon: "fa-sack-dollar", tip: "CLOOT.Keybind.Loot", run: () => openLoot(td, null) });
+      if (type === "npc") buttons.push({ icon: "fa-dice", tip: "CLOOT.Table.Open", run: () => editTable(td.baseActor ?? td.actor) });
+      buttons.push({ icon: "fa-hand-holding", tip: "CLOOT.Menu.Thievery", run: () => editThievery(td) });
     } else if (!isDeadClient(td) && showLoot && corpsesNear(td).length) {
       buttons.push({ icon: "fa-sack-dollar", tip: "CLOOT.Keybind.Loot", run: () => lootNearby() });
     }
@@ -360,19 +424,21 @@ Hooks.on("renderTokenHUD", (hud, html) => {
 /*  Beute-Tabelle am NSC-Bogen                   */
 /* -------------------------------------------- */
 
-// Zusätzlicher Zugang im Kopf des NSC-Bogens (falls dein Setup die Header-Menüs unterstützt).
+// Menüpunkt „Ascandir“ unter den drei Punkten: Charakterbögen, NSC-Bögen und Token-Einstellungen
 Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {
   try {
     const doc = app.document;
-    if (!game.user.isGM || doc?.documentName !== "Actor" || doc.type !== "npc") return;
+    if (!game.user.isGM || !doc) return;
+    const ok = (doc.documentName === "Actor" && ["npc", "character"].includes(doc.type)) || doc.documentName === "Token";
+    if (!ok || controls.some((c) => c.action === "corpseLootMenu")) return;
     controls.push({
-      icon: "fa-solid fa-dice",
-      label: "CLOOT.Table.Open",
-      action: "corpseLootTable",
-      onClick: () => editTable(doc)
+      icon: "fa-solid fa-skull",
+      label: "CLOOT.Menu.Name",
+      action: "corpseLootMenu",
+      onClick: () => openAscandirMenu(doc)
     });
   } catch (err) {
-    console.error(`${MODULE_ID} | Header-Eintrag konnte nicht angelegt werden`, err);
+    console.error(`${MODULE_ID} | Menüpunkt konnte nicht angelegt werden`, err);
   }
 });
 

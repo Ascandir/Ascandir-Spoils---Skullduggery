@@ -1,11 +1,12 @@
-<div class="cl-bag cl-bag-small {{#if bagOn}}cl-bag-on{{/if}}">
+<div class="cl-bag cl-lockwin {{#if bagOn}}cl-lock-on{{/if}}">
   {{#if bagOn}}
-  <div class="cl-bag-art" style="border-image-source: url('{{assets}}/bag/body.webp')"></div>
-  <span class="cl-medal cl-medal-plain"><i class="fa-solid fa-lock"></i></span>
+  <img class="cl-shackle" src="{{assets}}/lock/shackle.webp" alt="">
+  <div class="cl-plate"><i class="cl-rivet r1"></i><i class="cl-rivet r2"></i><i class="cl-rivet r3"></i><i class="cl-rivet r4"></i></div>
+  <img class="cl-keyhole" src="{{assets}}/lock/keyhole.webp" alt="">
   <button type="button" class="cl-bag-close" data-action="close" data-tooltip="CLOOT.Close" aria-label="{{localize 'CLOOT.Close'}}" style="background-image: url('{{assets}}/bag/button.webp')"></button>
   {{/if}}
 
-  <section class="corpse-loot-body bag-panel" {{#if bagOn}}style="background-image: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.45)), url('{{assets}}/bag/suede.webp')"{{/if}}>
+  <section class="corpse-loot-body bag-panel cl-lockpanel">
   {{#if gone}}
     <p class="bag-notice">{{localize "CLOOT.Err.NoDoor"}}</p>
   {{else}}

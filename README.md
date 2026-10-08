@@ -1,4 +1,4 @@
-# Ascandir – Spoils & Skullduggery v0.18.0
+# Ascandir – Spoils & Skullduggery v0.19.0
 
 Tote NSCs und Spielercharaktere (Totenkopf-Status) lassen sich im Umkreis plündern. D&D 5e, Foundry v13/v14.
 
@@ -154,3 +154,13 @@ Klickt ein Spieler auf eine Tür, die auf „Verschlossen“ steht und ein Schlo
 Im Schloss-Abschnitt gibt es **Versuche pro Charakter** (leer = unbegrenzt). Gezählt wird der tatsächliche Würfelwurf, nicht das Öffnen des Fensters. Jeder Charakter hat seine eigenen Versuche. Mit dem Knopf **Versuche zurücksetzen** setzt du die Zähler zurück, bei Erfolg werden sie automatisch gelöscht. Das Fenster zeigt dem Spieler, wie viele Versuche er noch hat.
 
 Das Fenster der verschlossenen Tür nutzt denselben Lederbeutel wie das Beute-Fenster. Auch die kleinen Dialoge (Einstellung des Taschendiebstahls, Auswahl bei mehreren Leichen) und der Schloss-Abschnitt im Wand-Fenster sind im Leder-Design gehalten.
+
+## Das Ascandir-Menü (Spielleitung)
+Auf Actor-Bögen (NSC und Spielercharaktere) und in der Token-Konfiguration gibt es oben unter den drei Punkten den Eintrag **Ascandir**. Darin:
+- **Loottable** (nur NSC): Beute-Tabelle bearbeiten.
+- **Thievery**: Taschendiebstahl für diesen Token an/aus/Standard, eigener SG, und die Liste aller Diebe, die es versucht haben, mit Zurücksetzen (auch "alle zurücksetzen"). So lässt sich ein ertappter Dieb wieder neu versuchen.
+- **Thievery (Vorlage für neue Token)**: dasselbe für den Prototype-Token.
+Im Token-HUD hat die Spielleitung zusätzlich einen Thievery-Knopf und kann bei lebenden Token das Beute-Fenster öffnen.
+
+## Aussehen: das Schloss
+Das Türschloss-Fenster ist ein echtes Schloss: Eisenplatte mit Messingrand, Nieten, Stahlbügel und Schlüsselloch-Scheibe.

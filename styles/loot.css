@@ -278,9 +278,9 @@
 .cl-bag-close:hover { filter: brightness(1.25); transform: scale(1.06); box-shadow: none; }
 
 /* Das Foundry-Fenster verschwindet; die Titelleiste bleibt als unsichtbarer Griff zum Verschieben */
-.application:has(.cl-bag-on) { background: none; border: 0; box-shadow: none; overflow: visible; }
-.application:has(.cl-bag-on) .window-header { position: absolute; top: 0; left: 0; right: 0; z-index: 20; height: 2.4rem; padding: 0; margin: 0; background: none; border: 0; box-shadow: none; overflow: visible; cursor: grab; }
-.application:has(.cl-bag-on) .window-header > * { display: none !important; }
+.application:is(:has(.cl-bag-on),:has(.cl-lock-on)) { background: none; border: 0; box-shadow: none; overflow: visible; }
+.application:is(:has(.cl-bag-on),:has(.cl-lock-on)) .window-header { position: absolute; top: 0; left: 0; right: 0; z-index: 20; height: 2.4rem; padding: 0; margin: 0; background: none; border: 0; box-shadow: none; overflow: visible; cursor: grab; }
+.application:is(:has(.cl-bag-on),:has(.cl-lock-on)) .window-header > * { display: none !important; }
 .application:has(.cl-bag-on) .window-resize-handle { z-index: 30; }
 
 /* Innenraum: dunkles Wildleder */
@@ -399,3 +399,30 @@
 .corpse-loot-lock .hint { font-style: italic; }
 .corpse-loot-reset { flex: 0 0 auto; width: auto; padding: 0 0.7rem; border: 1px solid #8a6a3a; background: linear-gradient(180deg, #4d3522, #2c1d13); color: #ecdcc0; border-radius: 4px; cursor: pointer; }
 .corpse-loot-reset:hover { color: #fff; border-color: #f0c878; }
+
+/* Thievery-Fenster */
+.cl-thievery .window-content { padding: 0.8rem 1rem 1rem; }
+.cl-thievery select { background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(190, 150, 95, 0.4); color: #f0dfb8; border-radius: 4px; }
+.cl-thievery select option { background: #2a1b12; color: #f0dfb8; }
+.cl-th-list { margin-top: 0.7rem; padding-top: 0.5rem; border-top: 1px solid rgba(190, 150, 95, 0.3); }
+.cl-th-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; font-family: "CL Title", "Cinzel", serif; color: #d9b36a; }
+.cl-th-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.15rem 0; }
+.cl-th-row > span:first-child { flex: 1 1 auto; }
+.cl-th-state { font-style: italic; color: #b9a584; }
+.cl-thievery button { cursor: pointer; background: linear-gradient(180deg, #4d3522, #2c1d13); border: 1px solid #8a6a3a; color: #ecdcc0; border-radius: 4px; padding: 0.15rem 0.6rem; width: auto; }
+.cl-thievery button:hover { color: #fff; border-color: #f0c878; box-shadow: 0 0 8px rgba(240, 200, 120, 0.45); }
+.cl-thievery .form-footer { margin-top: 0.8rem; display: flex; justify-content: flex-end; }
+
+/* ---------- Schloss-Fenster ---------- */
+.cl-lockwin { position: relative; padding: 118px 10px 10px; }
+.cl-lockwin .cl-shackle { position: absolute; z-index: 0; left: 50%; top: 0; width: 330px; height: auto; transform: translateX(-50%); pointer-events: none; filter: drop-shadow(0 6px 6px rgba(0,0,0,.6)); }
+.cl-lockwin .cl-plate { position: absolute; z-index: 1; inset: 100px 0 0 0; border-radius: 22px; border: 3px solid #1c1f26;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, rgba(0,0,0,.05) 1px 3px), linear-gradient(145deg, #7b828f 0%, #4a505b 38%, #343942 62%, #5a616d 100%);
+  box-shadow: inset 0 0 0 5px #8a6a2a, inset 0 0 0 7px #3b2a0c, inset 0 3px 10px rgba(255,255,255,.25), inset 0 -8px 16px rgba(0,0,0,.5), 0 14px 26px rgba(0,0,0,.65); }
+.cl-lockwin .cl-rivet { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f3dc9a, #b98a2e 55%, #5a3d0c); box-shadow: 0 2px 3px rgba(0,0,0,.7), inset 0 0 2px rgba(0,0,0,.5); }
+.cl-lockwin .r1 { left: 18px; top: 18px; } .cl-lockwin .r2 { right: 18px; top: 18px; } .cl-lockwin .r3 { left: 18px; bottom: 18px; } .cl-lockwin .r4 { right: 18px; bottom: 18px; }
+.cl-lockwin .cl-keyhole { position: absolute; z-index: 3; left: 50%; top: 58px; width: 92px; height: 92px; transform: translateX(-50%); filter: drop-shadow(0 4px 4px rgba(0,0,0,.7)); pointer-events: none; }
+.cl-lockwin .cl-bag-close { z-index: 6; right: 26px; top: 118px; width: 56px; height: 56px; }
+.cl-lockwin .cl-lockpanel { position: relative; z-index: 2; margin: 0 22px 22px; padding: 70px 1.1rem 1rem; border-radius: 12px; background: linear-gradient(180deg, rgba(8,9,12,.72), rgba(16,18,24,.82)); box-shadow: inset 0 3px 12px #000, 0 1px 0 rgba(255,255,255,.15); border: 1px solid #14161b; }
+.cl-lockwin .bag-head { text-align: center; }
+.cl-lockwin .bag-title h2 { color: #ecd9a0; }

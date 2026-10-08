@@ -1,0 +1,41 @@
+<div class="cl-th">
+  <p class="hint">{{#if isToken}}{{localize "CLOOT.Thief.IntroToken"}}{{else}}{{localize "CLOOT.Thief.IntroProto"}}{{/if}}</p>
+
+  <div class="form-group">
+    <label>{{localize "CLOOT.Thief.Allow"}}</label>
+    <div class="form-fields">
+      <select name="mode">
+        {{#each modes}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+      </select>
+    </div>
+    <p class="hint">{{localize "CLOOT.Thief.AllowHint"}} ({{#if worldAllowed}}{{localize "CLOOT.Thief.WorldOn"}}{{else}}{{localize "CLOOT.Thief.WorldOff"}}{{/if}})</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "CLOOT.Pick.DC"}}</label>
+    <div class="form-fields"><input type="number" name="dc" min="1" step="1" value="{{dc}}" placeholder="{{passive}}"></div>
+    <p class="hint">{{localize "CLOOT.Thief.DCHint"}} ({{passive}})</p>
+  </div>
+
+  {{#if isToken}}
+  <div class="cl-th-list">
+    <div class="cl-th-head">
+      <strong>{{localize "CLOOT.Thief.List"}}</strong>
+      {{#if hasThieves}}<button type="button" data-action="resetAll"><i class="fa-solid fa-rotate-left"></i> {{localize "CLOOT.Thief.ResetAll"}}</button>{{/if}}
+    </div>
+    {{#each thieves}}
+    <div class="cl-th-row">
+      <span>{{name}}</span>
+      <span class="cl-th-state">{{#if success}}{{localize "CLOOT.Thief.Success"}}{{else if failed}}{{localize "CLOOT.Pick.Caught"}}{{/if}}</span>
+      <button type="button" data-action="reset" data-actor="{{id}}" data-tooltip="CLOOT.Pick.Reset"><i class="fa-solid fa-rotate-left"></i></button>
+    </div>
+    {{else}}
+    <p class="hint">{{localize "CLOOT.Thief.NoThieves"}}</p>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  <footer class="form-footer">
+    <button type="button" data-action="save"><i class="fa-solid fa-floppy-disk"></i> {{localize "CLOOT.Pick.Save"}}</button>
+  </footer>
+</div>
